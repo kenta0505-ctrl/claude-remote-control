@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+build/
+
+# Runtime data (SQLite DB + uploaded business card images)
+data/
+
+.env
+.env.local
+.env*.local
+
+npm-debug.log*
+yarn-error.log*
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
