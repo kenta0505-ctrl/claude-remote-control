@@ -24,8 +24,12 @@
 
 ```bash
 npm install
+npm run seed         # デモ用の名刺を 8 件登録（任意）
 npm run dev          # http://localhost:3000
 ```
+
+`npm run seed` は空のデータベースにだけ書き込みます。既存データを消して
+入れ直す場合は `npm run seed -- --reset` を使ってください。
 
 本番用:
 
@@ -82,6 +86,7 @@ MEISHI_PASSWORD=8文字以上のパスワード
 | `npm run dev` | 開発サーバー |
 | `npm run build` | 本番ビルド |
 | `npm start` | 本番サーバー |
+| `npm run seed` | デモ用の名刺データを登録（`-- --reset` で入れ直し） |
 | `npm test` | ユニットテスト（Node 標準テストランナー） |
 | `npm run typecheck` | 型チェック |
 | `npm run lint` | Lint |
@@ -112,6 +117,7 @@ src/
     form.ts                      入力の検証・正規化
     upload.ts                    画像の保存・削除
     export.ts                    CSV / vCard 生成
+scripts/seed.ts                  デモ用データの投入
 tests/                           db・入力検証・書き出し・認証のテスト
 data/                            SQLite と画像の保存先（gitignore 済み）
 ```
