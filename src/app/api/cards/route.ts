@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireApiAuth } from "@/lib/auth-guard";
 import { createCard, listCards } from "@/lib/db";
 import { parseTags } from "@/lib/form";
 import { CARD_TEXT_FIELDS, SORT_OPTIONS, type CardInput, type SortKey } from "@/lib/types";
@@ -6,6 +7,9 @@ import { CARD_TEXT_FIELDS, SORT_OPTIONS, type CardInput, type SortKey } from "@/
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
+  const denied = await requireApiAuth();
+  if (denied) return denied;
+
   const params = new URL(request.url).searchParams;
   const requestedSort = params.get("sort") ?? "";
   const sort: SortKey = SORT_OPTIONS.some((o) => o.value === requestedSort)
@@ -21,6 +25,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const denied = await requireApiAuth();
+  if (denied) return denied;
+
   let body: unknown;
   try {
     body = await request.json();

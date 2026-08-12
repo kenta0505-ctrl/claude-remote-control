@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import DeleteCardButton from "@/components/DeleteCardButton";
+import { requireSession } from "@/lib/auth-guard";
 import { getCard } from "@/lib/db";
 import { FIELD_LABELS, type Card } from "@/lib/types";
 
@@ -49,6 +50,8 @@ function Row({ field, value }: { field: keyof Card; value: string }) {
 
 export default async function CardDetailPage({ params }: Params) {
   const id = Number((await params).id);
+  await requireSession(`/cards/${id}`);
+
   const card = Number.isInteger(id) ? getCard(id) : null;
   if (!card) notFound();
 

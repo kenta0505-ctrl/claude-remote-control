@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireSession } from "./auth-guard";
 import { createCard, deleteCard, getCard, updateCard } from "./db";
 import { parseCardForm } from "./form";
 import { UploadError, deleteCardImage, saveCardImage } from "./upload";
@@ -35,6 +36,8 @@ export async function createCardAction(
   _prevState: FormState,
   formData: FormData,
 ): Promise<FormState> {
+  await requireSession();
+
   const parsed = parseCardForm(formData);
   if (!parsed.ok) return { errors: parsed.errors, values: parsed.input };
 
@@ -57,6 +60,8 @@ export async function updateCardAction(
   _prevState: FormState,
   formData: FormData,
 ): Promise<FormState> {
+  await requireSession();
+
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id) || id <= 0) {
     return { errors: ["更新対象の名刺が見つかりません。"], values: null };
@@ -87,6 +92,8 @@ export async function updateCardAction(
 }
 
 export async function deleteCardAction(formData: FormData): Promise<void> {
+  await requireSession();
+
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id) || id <= 0) redirect("/");
 

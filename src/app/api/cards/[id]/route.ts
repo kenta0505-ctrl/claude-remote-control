@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireApiAuth } from "@/lib/auth-guard";
 import { deleteCard, getCard, updateCard } from "@/lib/db";
 import { parseTags } from "@/lib/form";
 import { deleteCardImage } from "@/lib/upload";
@@ -16,12 +17,18 @@ async function readId(context: Context): Promise<number | null> {
 const NOT_FOUND = NextResponse.json({ error: "名刺が見つかりません。" }, { status: 404 });
 
 export async function GET(_request: Request, context: Context) {
+  const denied = await requireApiAuth();
+  if (denied) return denied;
+
   const id = await readId(context);
   const card = id ? getCard(id) : null;
   return card ? NextResponse.json({ card }) : NOT_FOUND;
 }
 
 export async function PUT(request: Request, context: Context) {
+  const denied = await requireApiAuth();
+  if (denied) return denied;
+
   const id = await readId(context);
   const existing = id ? getCard(id) : null;
   if (!existing || !id) return NOT_FOUND;
@@ -61,6 +68,9 @@ export async function PUT(request: Request, context: Context) {
 }
 
 export async function DELETE(_request: Request, context: Context) {
+  const denied = await requireApiAuth();
+  if (denied) return denied;
+
   const id = await readId(context);
   const deleted = id ? deleteCard(id) : null;
   if (!deleted) return NOT_FOUND;

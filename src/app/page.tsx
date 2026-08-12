@@ -1,6 +1,7 @@
 import Link from "next/link";
 import CardTile from "@/components/CardTile";
 import SearchControls from "@/components/SearchControls";
+import { requireSession } from "@/lib/auth-guard";
 import { countCards, listCards, listTags } from "@/lib/db";
 import { SORT_OPTIONS, type SortKey } from "@/lib/types";
 
@@ -15,6 +16,8 @@ export default async function HomePage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  await requireSession();
+
   const params = await searchParams;
   const query = readParam(params.q);
   const tag = readParam(params.tag);

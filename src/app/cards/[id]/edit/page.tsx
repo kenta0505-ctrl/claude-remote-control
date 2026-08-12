@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import CardForm from "@/components/CardForm";
 import { updateCardAction } from "@/lib/actions";
+import { requireSession } from "@/lib/auth-guard";
 import { getCard } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +16,8 @@ export async function generateMetadata({ params }: Params) {
 
 export default async function EditCardPage({ params }: Params) {
   const id = Number((await params).id);
+  await requireSession(`/cards/${id}/edit`);
+
   const card = Number.isInteger(id) ? getCard(id) : null;
   if (!card) notFound();
 

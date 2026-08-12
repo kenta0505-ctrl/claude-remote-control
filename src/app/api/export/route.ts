@@ -1,3 +1,4 @@
+import { requireApiAuth } from "@/lib/auth-guard";
 import { listCards } from "@/lib/db";
 import { contentDisposition, toCsv, toVCard } from "@/lib/export";
 import { SORT_OPTIONS, type SortKey } from "@/lib/types";
@@ -6,6 +7,9 @@ export const dynamic = "force-dynamic";
 
 /** Exports the current (optionally filtered) card set as CSV or vCard. */
 export async function GET(request: Request) {
+  const denied = await requireApiAuth();
+  if (denied) return denied;
+
   const params = new URL(request.url).searchParams;
   const format = params.get("format") === "vcf" ? "vcf" : "csv";
   const requestedSort = params.get("sort") ?? "";
