@@ -1,0 +1,20 @@
+{
+  "name": "claude-remote-control",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser control for Claude Code remote (cloud) sessions, where the /chrome integration cannot reach your local browser.",
+  "type": "module",
+  "bin": {
+    "claude-chrome": "bin/claude-chrome.mjs"
+  },
+  "scripts": {
+    "chrome": "node bin/claude-chrome.mjs",
+    "smoke": "node test/smoke.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "^1.62.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

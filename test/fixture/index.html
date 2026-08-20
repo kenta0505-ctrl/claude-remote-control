@@ -1,0 +1,12 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>claude-chrome fixture</title>
+<h1>Fixture page</h1>
+<form id="f" onsubmit="event.preventDefault(); document.getElementById('out').textContent = 'submitted: ' + q.value;">
+  <input id="q" name="q" placeholder="query">
+  <button id="go" type="submit">Search</button>
+</form>
+<p id="out">nothing yet</p>
+<button id="boom" onclick="console.error('boom clicked'); undefinedFn()">Break something</button>
+<a id="next" href="/second.html">Second page</a>
+<script>console.log('fixture loaded')</script>
