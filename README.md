@@ -13,17 +13,26 @@ Claude / Claude Code / Claude Cowork の更新を**毎朝7時台(JST)に自動�
 ```
 毎朝 07:17 JST
    │
-   ├─ ① fetch-sources.sh … 8つの一次ソースを curl でバイト単位取得 → sources/
+   ├─ ⓪ PROFILE.md 読込  … 何を拾い何を捨てるかの基準
    │
-   ├─ ② diff-report.sh   … 前日コミットとの git 差分だけを抽出
+   ├─ ① Routine 健康診断 … 全 Routine の last_run を点検し、
+   │                        止まっているものを名指しで検出  ★最重要
+   │
+   ├─ ② fetch-sources.sh … 8つの一次ソースを curl でバイト単位取得 → sources/
+   │
+   ├─ ③ diff-report.sh   … 前日コミットとの git 差分だけを抽出
    │                        （差分ゼロなら「更新なし」で終了）
    │
-   ├─ ③ WebSearch        … curl できない領域（Cowork / 製品発表）を補完
+   ├─ ④ WebSearch        … curl できない領域（Cowork / 製品発表）を補完
    │
-   ├─ ④ ダイジェスト生成 … 差分を3層（🔴🟡⚪）に整理して日本語化
+   ├─ ⑤ ダイジェスト生成 … PROFILE で濾して3層（🔴🟡⚪）に整理＋今日試す1つ
    │
-   └─ ⑤ commit & push    … digests/ + LATEST.md + sources/ を一緒に保存
+   └─ ⑥ commit & push    … digests/ + LATEST.md + sources/ を一緒に保存
 ```
+
+**このダイジェストの主役は①です。** 新機能の紹介より、
+「昨日の自動化が全部動いたか」を毎朝確かめることのほうが実務では効きます。
+実際に、tsubu. の週次点検が4日間気づかれないまま止まっていたことがあります。
 
 **要点は「差分だけを読む」こと。** CHANGELOG だけで55万文字あるため、毎朝それを全部読ませると
 遅く・高く・要約がブレます。前日のスナップショットを git に置き、差分行だけをダイジェスト化することで、
@@ -40,6 +49,7 @@ Claude / Claude Code / Claude Cowork の更新を**毎朝7時台(JST)に自動�
 | `sources/_fetch-status.tsv` | 直近の取得結果。`FAIL` があればソースのURLが変わった可能性 |
 | `sources.tsv` | 収集対象の定義。**1行足せば収集対象が増えます** |
 | `PLAYBOOK.md` | 毎朝のセッションが読んで実行する手順書 |
+| `PROFILE.md` | **何を拾い何を捨てるかの基準。**ここがズレるとダイジェスト全体がズレる |
 | `scripts/` | 収集・差分・確定の各スクリプト |
 
 ## 収集しているソース
@@ -63,7 +73,8 @@ Claude / Claude Code / Claude Cowork の更新を**毎朝7時台(JST)に自動�
 ## 手を入れるとき
 
 - **収集対象を増やしたい** → `sources.tsv` に `名前<TAB>URL` を1行追加
-- **ダイジェストの書き方を変えたい** → `PLAYBOOK.md` の手順4を編集
+- **ダイジェストの書き方を変えたい** → `PLAYBOOK.md` の手順5を編集
+- **拾う/捨てるの基準を変えたい** → `PROFILE.md` を編集（仕事が変わったら必ずここを直す）
 - **時刻を変えたい** → Routine（後述）の cron を変更
 - **手動で今すぐ回したい** → `./scripts/fetch-sources.sh && ./scripts/diff-report.sh`
 
