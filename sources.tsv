@@ -1,0 +1,13 @@
+# 収集対象ソース一覧（name <TAB> url）
+# ここに1行足すだけで収集対象が増えます。'#' 始まりはコメント。
+# 注意: www.anthropic.com / www.claude.com / support.claude.com / status.anthropic.com は
+#       このcloud環境のegressプロキシでブロックされているため curl 不可。
+#       それらの領域（Cowork・Claudeアプリ・製品発表）は PLAYBOOK.md の WebSearch 手順でカバーします。
+claude-code-changelog.md	https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md
+claude-code-docs-index.txt	https://code.claude.com/docs/llms.txt
+platform-release-notes.md	https://platform.claude.com/docs/en/release-notes/overview.md
+platform-docs-index.txt	https://platform.claude.com/llms.txt
+models-overview.md	https://platform.claude.com/docs/en/models/overview.md
+model-deprecations.md	https://platform.claude.com/docs/en/about-claude/model-deprecations.md
+pricing.md	https://platform.claude.com/docs/en/about-claude/pricing.md
+npm-claude-code-latest.json	https://registry.npmjs.org/@anthropic-ai/claude-code/latest
