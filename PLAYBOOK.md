@@ -47,6 +47,13 @@ WebSearch で以下を検索し、**前回ダイジェストの日付以降の�
 
 `digests/YYYY-MM-DD.md` を作成します。**日本語**で、以下の3層構成にしてください。
 
+> ⚠️ **日付は必ず JST で取ってください。**
+> ```bash
+> TZ=Asia/Tokyo date +%F    # ← これを使う
+> ```
+> このコンテナは UTC で動いています。発火時刻(22:17 UTC)は JST では翌日の朝なので、
+> 素の `date +%F` を使うとダイジェストが読み手のカレンダーより1日古い日付で保存されます。
+
 - 🔴 **今日必ず知るべき** — 破壊的変更、モデルの追加/引退、価格改定、セキュリティ、今の使い方が壊れるもの
 - 🟡 **知っておくと良い** — 新機能、新しいコマンド/設定、目に見える改善
 - ⚪ **参考** — 細かいバグ修正、内部改善。件数だけ書いて全部並べない
@@ -60,7 +67,7 @@ WebSearch で以下を検索し、**前回ダイジェストの日付以降の�
 ### 5. 更新して確定する
 
 ```bash
-./scripts/finalize.sh YYYY-MM-DD
+./scripts/finalize.sh          # 引数を省略すると JST の今日が使われます
 ```
 
 `LATEST.md` の差し替えと `INDEX.md` への追記を行います。
@@ -68,7 +75,7 @@ WebSearch で以下を検索し、**前回ダイジェストの日付以降の�
 
 ```bash
 git add -A
-git commit -m "digest: YYYY-MM-DD"
+git commit -m "digest: $(TZ=Asia/Tokyo date +%F)"
 git push -u origin claude/daily-claude-info-collection-3voozl
 ```
 

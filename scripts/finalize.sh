@@ -6,11 +6,10 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-DATE="${1:-}"
-if [ -z "$DATE" ]; then
-  echo "使い方: $0 YYYY-MM-DD" >&2
-  exit 1
-fi
+# コンテナは UTC で動くが、読む人は日本にいる。
+# 発火時刻 22:17 UTC は JST では翌日の朝なので、素の `date +%F` を使うと
+# ダイジェストが利用者のカレンダーより常に1日ズレる。既定を JST に固定する。
+DATE="${1:-$(TZ=Asia/Tokyo date +%F)}"
 if ! printf '%s' "$DATE" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'; then
   echo "日付の形式が不正です: $DATE (YYYY-MM-DD で指定してください)" >&2
   exit 1

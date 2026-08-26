@@ -35,7 +35,7 @@ Claude / Claude Code / Claude Cowork の更新を**毎朝7時台(JST)に自動�
 |---|---|
 | `LATEST.md` | 最新ダイジェスト（自動生成・直接編集しない） |
 | `INDEX.md` | 全ダイジェストの索引（自動生成） |
-| `digests/YYYY-MM-DD.md` | その日のダイジェスト本体 |
+| `digests/YYYY-MM-DD.md` | その日のダイジェスト本体（**日付は JST 基準**） |
 | `sources/` | 一次ソースの生スナップショット（**翌日の差分基準。消さないこと**） |
 | `sources/_fetch-status.tsv` | 直近の取得結果。`FAIL` があればソースのURLが変わった可能性 |
 | `sources.tsv` | 収集対象の定義。**1行足せば収集対象が増えます** |
@@ -72,3 +72,8 @@ Claude / Claude Code / Claude Cowork の更新を**毎朝7時台(JST)に自動�
 Claude の Routine 機能で毎朝 **07:17 JST**（= 22:17 UTC）に新規セッションが起動し、
 `PLAYBOOK.md` に従って収集・生成・push まで行います。
 一覧・停止・時刻変更は Claude に「Routine を見せて」と頼めば操作できます。
+完了時にスマホへプッシュ通知が飛びます（不要なら Claude に「日次収集の通知を切って」と言えば止まります）。
+
+> **日付は JST 基準で統一しています。** 実行コンテナは UTC で動くため、素の `date` を使うと
+> ファイル名が読み手のカレンダーより1日古くなります。スクリプトと PLAYBOOK は
+> `TZ=Asia/Tokyo date +%F` を使うよう固定してあります。
