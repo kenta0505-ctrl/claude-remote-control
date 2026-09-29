@@ -12,18 +12,18 @@ https://platform.claude.com
 
 The full documentation is available in the following languages on https://platform.claude.com/docs:
 
-- English (en) - 639 pages - /docs - Content included below
-- German (Deutsch) (de) - 261 pages - /docs/de - Visit website for content
-- Spanish (Español) (es) - 261 pages - /docs/es - Visit website for content
-- French (Français) (fr) - 261 pages - /docs/fr - Visit website for content
-- Italian (Italiano) (it) - 261 pages - /docs/it - Visit website for content
-- Japanese (日本語) (ja) - 261 pages - /docs/ja - Visit website for content
-- Korean (한국어) (ko) - 261 pages - /docs/ko - Visit website for content
-- Portuguese (Português) (pt-BR) - 261 pages - /docs/pt-BR - Visit website for content
-- Russian (Русский) (ru) - 261 pages - /docs/ru - Visit website for content
-- Chinese Simplified (简体中文) (zh-CN) - 261 pages - /docs/zh-CN - Visit website for content
-- Chinese Traditional (繁體中文) (zh-TW) - 261 pages - /docs/zh-TW - Visit website for content
-- Indonesian (Bahasa Indonesia) (id) - 261 pages - /docs/id - Visit website for content
+- English (en) - 642 pages - /docs - Content included below
+- German (Deutsch) (de) - 264 pages - /docs/de - Visit website for content
+- Spanish (Español) (es) - 264 pages - /docs/es - Visit website for content
+- French (Français) (fr) - 264 pages - /docs/fr - Visit website for content
+- Italian (Italiano) (it) - 264 pages - /docs/it - Visit website for content
+- Japanese (日本語) (ja) - 264 pages - /docs/ja - Visit website for content
+- Korean (한국어) (ko) - 264 pages - /docs/ko - Visit website for content
+- Portuguese (Português) (pt-BR) - 264 pages - /docs/pt-BR - Visit website for content
+- Russian (Русский) (ru) - 264 pages - /docs/ru - Visit website for content
+- Chinese Simplified (简体中文) (zh-CN) - 264 pages - /docs/zh-CN - Visit website for content
+- Chinese Traditional (繁體中文) (zh-TW) - 264 pages - /docs/zh-TW - Visit website for content
+- Indonesian (Bahasa Indonesia) (id) - 264 pages - /docs/id - Visit website for content
 
 ---
 
@@ -219,6 +219,7 @@ The full documentation is available in the following languages on https://platfo
 - [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5.md)
 - [Prompting Claude Opus 5.5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5.md)
 - [Prompting Claude Sonnet 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-sonnet-5.md)
+- [Prompting Claude Sonnet 5.5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-sonnet-5-5.md)
 - [Reduce hallucinations](https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations.md)
 - [Reduce prompt leak](https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-prompt-leak.md)
 - [Reducing latency](https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-latency.md)
@@ -240,6 +241,7 @@ The full documentation is available in the following languages on https://platfo
 - [Claude Sonnet 4.5](https://platform.claude.com/docs/en/models/sonnet-4-5/overview.md)
 - [Claude Sonnet 4.6](https://platform.claude.com/docs/en/models/sonnet-4-6/overview.md)
 - [Claude Sonnet 5](https://platform.claude.com/docs/en/models/sonnet-5/overview.md)
+- [Claude Sonnet 5.5](https://platform.claude.com/docs/en/models/sonnet-5-5/overview.md)
 - [Model cards](https://platform.claude.com/docs/en/resources/overview.md)
 - [Models overview](https://platform.claude.com/docs/en/models/overview.md)
 - [Overview](https://platform.claude.com/docs/en/release-notes/system-prompts/overview.md) - System prompts
@@ -264,10 +266,11 @@ The full documentation is available in the following languages on https://platfo
 - [Claude Sonnet 4.5](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-sonnet-4-5.md) - Claude Sonnet 4.5 system prompts
 - [Claude Sonnet 4.6](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-sonnet-4-6.md) - Claude Sonnet 4.6 system prompts
 - [Claude Sonnet 5](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-sonnet-5.md) - Claude Sonnet 5 system prompts
+- [Claude Sonnet 5.5](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-sonnet-5-5.md) - Claude Sonnet 5.5 system prompts
 - [Migration guide](https://platform.claude.com/docs/en/models/fable-5-1/migration-guide.md) - Migrating to Claude Fable 5.1 and Claude Mythos 5.1
 - [Migration guide](https://platform.claude.com/docs/en/models/haiku-4-5/migration-guide.md) - Migrating to Claude Haiku 4.5
 - [Migration guide](https://platform.claude.com/docs/en/models/opus-5-5/migration-guide.md) - Migrating to Claude Opus 5.5
-- [Migration guide](https://platform.claude.com/docs/en/models/sonnet-5/migration-guide.md) - Migrating to Claude Sonnet 5
+- [Migration guide](https://platform.claude.com/docs/en/models/sonnet-5-5/migration-guide.md) - Migrating to Claude Sonnet 5.5
 - [Upgrade between model versions](https://platform.claude.com/docs/en/about-claude/models/migration-guide.md) - Migration guides
 - [Model deprecations](https://platform.claude.com/docs/en/about-claude/model-deprecations.md)
 - [Model IDs and versioning](https://platform.claude.com/docs/en/about-claude/models/model-ids-and-versions.md)
@@ -275,7 +278,7 @@ The full documentation is available in the following languages on https://platfo
 - [Pricing](https://platform.claude.com/docs/en/about-claude/pricing.md)
 - [What's new](https://platform.claude.com/docs/en/models/fable-5-1/whats-new-fable-5-1.md) - What's new in Claude Fable 5.1
 - [What's new](https://platform.claude.com/docs/en/models/opus-5-5/whats-new-opus-5-5.md) - What's new in Claude Opus 5.5
-- [What's new](https://platform.claude.com/docs/en/models/sonnet-5/whats-new-sonnet-5.md) - What's new in Claude Sonnet 5
+- [What's new](https://platform.claude.com/docs/en/models/sonnet-5-5/whats-new-sonnet-5-5.md) - What's new in Claude Sonnet 5.5
 
 ### SDKs, CLI, and libraries
 
