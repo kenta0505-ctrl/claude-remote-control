@@ -254,9 +254,11 @@ The full documentation is available in the following languages on https://platfo
 - [Overview](https://platform.claude.com/docs/en/release-notes/system-prompts/overview.md) - System prompts
 - [Choosing a model](https://platform.claude.com/docs/en/about-claude/models/choosing-a-model.md) - Choosing the right model
 - [Claude Fable 5](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-fable-5.md) - Claude Fable 5 system prompts
+- [Migration guide](https://platform.claude.com/docs/en/models/fable-5-1/migration-guide.md) - Claude Fable 5.1 and Claude Mythos 5.1 migration guide
 - [Claude Fable 5.1](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-fable-5-1.md) - Claude Fable 5.1 system prompts
 - [Claude Haiku 3](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-haiku-3.md) - Claude Haiku 3 system prompts
 - [Claude Haiku 3.5](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-haiku-3-5.md) - Claude Haiku 3.5 system prompts
+- [Migration guide](https://platform.claude.com/docs/en/models/haiku-4-5/migration-guide.md) - Claude Haiku 4.5 migration guide
 - [Claude Haiku 4.5](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-haiku-4-5.md) - Claude Haiku 4.5 system prompts
 - [Claude Opus 3](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-opus-3.md) - Claude Opus 3 system prompts
 - [Claude Opus 4](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-opus-4.md) - Claude Opus 4 system prompts
@@ -266,6 +268,7 @@ The full documentation is available in the following languages on https://platfo
 - [Claude Opus 4.7](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-opus-4-7.md) - Claude Opus 4.7 system prompts
 - [Claude Opus 4.8](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-opus-4-8.md) - Claude Opus 4.8 system prompts
 - [Claude Opus 5](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-opus-5.md) - Claude Opus 5 system prompts
+- [Migration guide](https://platform.claude.com/docs/en/models/opus-5-5/migration-guide.md) - Claude Opus 5.5 migration guide
 - [Claude Opus 5.5](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-opus-5-5.md) - Claude Opus 5.5 system prompts
 - [Claude Sonnet 3.5](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-sonnet-3-5.md) - Claude Sonnet 3.5 system prompts
 - [Claude Sonnet 3.7](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-sonnet-3-7.md) - Claude Sonnet 3.7 system prompts
@@ -273,11 +276,8 @@ The full documentation is available in the following languages on https://platfo
 - [Claude Sonnet 4.5](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-sonnet-4-5.md) - Claude Sonnet 4.5 system prompts
 - [Claude Sonnet 4.6](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-sonnet-4-6.md) - Claude Sonnet 4.6 system prompts
 - [Claude Sonnet 5](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-sonnet-5.md) - Claude Sonnet 5 system prompts
+- [Migration guide](https://platform.claude.com/docs/en/models/sonnet-5-5/migration-guide.md) - Claude Sonnet 5.5 migration guide
 - [Claude Sonnet 5.5](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-sonnet-5-5.md) - Claude Sonnet 5.5 system prompts
-- [Migration guide](https://platform.claude.com/docs/en/models/fable-5-1/migration-guide.md) - Migrating to Claude Fable 5.1 and Claude Mythos 5.1
-- [Migration guide](https://platform.claude.com/docs/en/models/haiku-4-5/migration-guide.md) - Migrating to Claude Haiku 4.5
-- [Migration guide](https://platform.claude.com/docs/en/models/opus-5-5/migration-guide.md) - Migrating to Claude Opus 5.5
-- [Migration guide](https://platform.claude.com/docs/en/models/sonnet-5-5/migration-guide.md) - Migrating to Claude Sonnet 5.5
 - [Upgrade between model versions](https://platform.claude.com/docs/en/about-claude/models/migration-guide.md) - Migration guides
 - [Model deprecations](https://platform.claude.com/docs/en/about-claude/model-deprecations.md)
 - [Model IDs and versioning](https://platform.claude.com/docs/en/about-claude/models/model-ids-and-versions.md)
@@ -817,7 +817,7 @@ The full documentation is available in the following languages on https://platfo
 
 - [Introducing Claude Fable 5 and Claude Mythos 5](https://platform.claude.com/docs/en/models/fable-5/introducing-claude-fable-5-and-claude-mythos-5.md)
 - [API usage primer for Claude](https://platform.claude.com/docs/en/claude_api_primer.md)
-- [Migrating to Claude Mythos 5 and Claude Fable 5](https://platform.claude.com/docs/en/models/fable-5/migration-guide.md)
+- [Claude Mythos 5 and Claude Fable 5 migration guide](https://platform.claude.com/docs/en/models/fable-5/migration-guide.md)
 
 ---
 

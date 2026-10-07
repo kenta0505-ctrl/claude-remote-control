@@ -8,5 +8,5 @@
     "node": ">=22.0.0"
   },
   "name": "@anthropic-ai/claude-code",
-  "version": "2.1.292"
+  "version": "2.1.293"
 }
