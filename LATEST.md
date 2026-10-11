@@ -1,103 +1,36 @@
 <!-- このファイルは scripts/finalize.sh が自動生成します。直接編集しないでください。 -->
-<!-- 編集する場合は digests/2026-10-11.md を直してから finalize.sh を再実行してください。 -->
+<!-- 編集する場合は digests/2026-10-12.md を直してから finalize.sh を再実行してください。 -->
 
-# 2026-10-11（日）Claude 更新ダイジェスト
+# 2026-10-12（月）Claude 更新ダイジェスト
 
 ## ① 今日の要点
 
-- **Claude Code のバージョンは動いていません。** 2.1.296 のまま、CHANGELOG にも差分なしです。小さい日です。
-- 代わりに、**auto モードの検査リクエストが無料になる**という変更について、専用のドキュメントが新設されました。**Pro / Max / Team プランは最初から無料の側です。**
-- Compliance API が、**Claude Docs の文書を Word ファイルとしてダウンロード**できるようになりました（beta）。
-- Claude Fable 5 の紹介ページと移行ガイドの **2ページが削除**されました。
-- 価格表・モデル一覧には変更がありません。
+**今日は更新なしです。**
+
+機械的に取得している8つのソースすべてが、昨日の取得時点から **1バイトも変わっていません。** Claude Code のバージョンも 2.1.296 のままです。
 
 ---
 
 ## ② ⚠️ 今の使い方が変わるもの
 
-### auto モードの検査リクエストが無料になります（ただし条件あり）
+今日はなし。
 
-新設されたドキュメントの内容です。これは**料金に関わる変更**なので ② に置きます。
+継続中のものを2つ、再掲します。
 
-**前提**: auto モード（Claude がある程度自分で判断して進むモード）では、シェルコマンドやネットワーク通信などの操作を実行する前に、**分類器（classifier）が内容を検査**します。
-
-**変更点**: この検査が **サーバー側で、そのセッション自身のモデルリクエストの一部として、無料で行われる**ようになりました。
-
-**ただし、サーバー側の検査が届かないセッションでは**、Claude Code が自前で検査リクエストを送ります。その場合は **これまで通りトークン使用量として課金されます**。その状態になったとき、以下の通知が出ます。
-
-> We're changing auto mode to no longer charge for classifier requests in Claude Code. However, this session isn't eligible.
-> （auto モードの検査リクエストを無料に変更していますが、このセッションは対象外です）
-
-**原さんへの関係**: ドキュメントに「**Pro、Max、Team プランでは、この通知は決して表示されません**」と明記されています。つまりこれらのプランは常に無料の側です。原さんのプランがどれかは PROFILE.md に書かれていないため、該当するかどうかは判断できません。
-
-**通知が出たときの操作**（ドキュメントの記載）
-
-| キー | 何が起きるか |
-|---|---|
-| **Enter** | 続行。保留された操作とそのセッションの残りは、Claude Code 自前の検査リクエスト（従来通り課金）を使う。そのセッションでは二度と表示されない。ゲートウェイ名が示されていた場合、そのマシンで**24時間**再表示されない |
-| **Esc** または **Ctrl+C** | 取り消し。保留された操作は実行されず、今のターンが止まる（auto モードのまま）。記憶されないので、次の検査対象の操作の前に再び表示される |
-
-**なぜ出るのか**（ドキュメントが挙げる原因）
-
-1. **LLM ゲートウェイやプロキシが経路にある**こと。リクエストのヘッダを削る・書き換える、知らないリクエスト項目を落とす、応答を編集する、といったもの。原因が特定できる場合、通知にそのゲートウェイ名が出ます
-2. **サーバー側の検査が、そのプラットフォーム・地域・資格情報にまだ届いていない**こと。ゲートウェイが無いのに出続ける場合は、こちらが原因の可能性が高いとされています
-
-**確認方法**: auto モードのセッションで `/status` を実行し、**「Auto mode server」の行**を見ます。`Enabled` ならサーバー側の検査が有効、`Disabled` なら自前に切り替わっています。
-
-**出なくする方法**: サーバー側の検査が使えないと分かっている場合、環境変数 `CLAUDE_CODE_AUTO_MODE_SERVER=0` を設定すると、検査は常に自前（従来通り課金）になり、通知は出なくなります。ただしドキュメントは「**これは一時的な設定で、将来のリリースで削除される可能性がある**」と明記しています。
-
-気になるなら聞けること: 「自分のプランだとこれ無料の側? 調べてもらえる?」
-
-（継続中のものを再掲します。**Claude Sonnet 4.5 が 2026年11月30日に API から停止**します。原さんの使用モデルは Claude Opus 5 なので直接の影響はありません。）
+- **Claude Sonnet 4.5 が 2026年11月30日に API から停止**します。原さんの使用モデルは Claude Opus 5 なので直接の影響はありません。
+- **Claude Haiku 4.5 の停止日が「2026年10月15日以降」** です。今日から3日後になります。廃止予告はまだ出ていませんが、日付が近いので置いておきます。
 
 ---
 
 ## ③ 今日の変更（説明つき）
 
-### Compliance API が、Claude Docs の文書を Word ファイルとして取得できるようになりました（beta）
-
-**Compliance API** は、組織のデータを取得・削除するための管理用 API です。昨日（10月8日付）にチャットの取得範囲が広がったとお伝えしましたが、今日は同じ日付の項目にもう1件追加されました。
-
-**Claude Docs の文書を Word ファイル（.docx）としてダウンロードできる**ようになりました。beta です。
-
-### Claude Fable 5 の紹介ページと移行ガイドが削除されました
-
-Platform ドキュメントから、以下の2ページが**削除**されました。
-
-- `models/fable-5/introducing-claude-fable-5-and-claude-mythos-5`（Claude Fable 5 と Claude Mythos 5 の紹介）
-- `models/fable-5/migration-guide`（移行ガイド）
-
-英語のページ数が **762 → 760** に減っています。
-
-リリースノート側も、削除されたページへのリンクが書き換えられました。
-
-- Fable 5 のリリース告知のリンク先が、紹介ページから **`models/fable-5/overview`（概要ページ）** に変更
-- 「Fable 5 と Mythos 5 では適応思考が唯一の思考モード」という項目から、**移行ガイドへのリンクが削除**されました（本文はそのまま残っています）
-
-**10月8日に Haiku 4.5 の移行ガイドが削除されたのと同じ動き**です。世代が1つ進むと、前の世代の移行ガイドが片付けられる、というパターンに見えます。Fable 5 自体は現行モデルのままで、廃止予告は出ていません。
+ありません。無理に埋めることはしません。
 
 ---
 
 ## ④ 一行で流すもの
 
-**Claude Code**
-- CHANGELOG に差分なし。npm のバージョンも 2.1.296 のまま変わっていません
-
-**ドキンュメント（Claude Code）**
-- 「Auto mode classifier request charges」のページが新設（②に記載）
-- 全12言語のドキュメントのページ数が **221 → 222**（上記1ページの追加が反映されたもの）
-- 各言語のまとめファイルの URL が、拡張子 `.md` から **`.txt`** に変わりました（`_llms/jp.md` → `_llms/jp.txt` など）。中身の変更ではなく、配信形式の変更です
-
-**ドキュメント（Platform）**
-- Fable 5 の紹介ページと移行ガイドの2ページ削除（③に記載）
-- 全言語のページ数が 280 → 278、英語が 762 → 760
-
-**変更がなかったもの**
-- Claude Code の CHANGELOG
-- 価格表（`pricing.md`）
-- モデル一覧（`models-overview.md`）
-- モデル廃止一覧（`model-deprecations.md`）
-- npm の最新版情報
+ありません。
 
 ---
 
@@ -107,32 +40,23 @@ Platform ドキュメントから、以下の2ページが**削除**されまし
 |---|---|---|
 | Claude Code（npm） | 2.1.296 | 2.1.296 |
 | CHANGELOG 最新 | 2.1.296 | 2.1.296 |
-| CHANGELOG の新規項目 | **0** | 79 |
-| Platform リリースノートの新規項目 | 1 | 1 |
-| 変更のあったソース | 3 / 8 | 8 / 8 |
+| CHANGELOG の新規項目 | 0 | 0 |
+| 変更のあったソース | **0 / 8** | 3 / 8 |
 
-モデルの状態: **変更なし**です。昨日の表から動いていません。
+8ソースのバイト数（すべて前日と同一）
 
-| モデル | 状態 | 停止日 |
-|---|---|---|
-| claude-fable-5-1 / claude-mythos-5-1 | 現行 | 2027-09-01 以降 |
-| claude-fable-5 / claude-mythos-5 | 現行 | 2027-06-09 以降 |
-| claude-mythos-preview | 廃止予告 | 未定 |
-| claude-opus-5-5 | 現行 | 2027-09-22 以降 |
-| **claude-opus-5**（原さんの使用モデル） | **現行** | 2027-07-24 以降 |
-| claude-opus-4-8 | 現行 | 2027-05-28 以降 |
-| claude-opus-4-7 | 現行 | 2027-04-16 以降 |
-| claude-opus-4-6 | 現行 | 2027-02-05 以降 |
-| claude-opus-4-5-20251101 | 現行 | 2026-11-24 以降 |
-| claude-sonnet-5-5 | 現行 | 2027-09-28 以降 |
-| claude-sonnet-5 | 現行 | 2027-06-30 以降 |
-| claude-sonnet-4-6 | 現行 | 2027-02-17 以降 |
-| claude-sonnet-4-5-20250929 | 廃止予告 | **2026-11-30** |
-| claude-haiku-5-5 | 現行 | 2027-10-07 以降 |
-| claude-haiku-4-5-20251001 | 現行 | **2026-10-15 以降**（4日後） |
-| claude-opus-4-1 / 4, claude-sonnet-4, claude-3-7-sonnet, claude-3-5-haiku, claude-3-haiku | 停止済み | — |
+| ソース | バイト数 |
+|---|---|
+| claude-code-changelog.md | 987,162 |
+| claude-code-docs-index.txt | 61,893 |
+| platform-release-notes.md | 124,710 |
+| platform-docs-index.txt | 82,696 |
+| models-overview.md | 19,747 |
+| model-deprecations.md | 14,238 |
+| pricing.md | 50,272 |
+| npm-claude-code-latest.json | 371 |
 
-価格表（`pricing.md`）も変更なしです。
+モデルの状態・価格表も変更なしです。昨日の表から動いていません。
 
 ---
 
@@ -140,31 +64,21 @@ Platform ドキュメントから、以下の2ページが**削除**されまし
 
 取得できた一次情報
 
-- Claude Code CHANGELOG — **差分なし**（2.1.296 のまま）
-- Claude Code ドキュメント目次（`auto-mode-classifier-billing` の新設、言語別まとめファイルの URL の拡張子変更、ページ数 221 → 222）
-- Claude Code ドキュメント「Auto mode classifier request charges」本文（`code.claude.com/docs/en/auto-mode-classifier-billing`）— ②の表と記載はこのページからの引用です
-- Claude Platform リリースノート（10月8日付に Compliance API の Word 出力が1件追加。Fable 5 の項目2件のリンク修正）
-- Claude Platform ドキュメント目次（Fable 5 の2ページ削除、ページ数 762 → 760）
-- モデル概要（`models-overview.md`）— 変更なし
-- モデル廃止一覧（`model-deprecations.md`）— 変更なし
-- 価格表（`pricing.md`）— 変更なし
-- npm `@anthropic-ai/claude-code` 最新版情報 — 変更なし
+- 8ソースすべて取得成功（`fetch-sources.sh` で 8/8 OK）、`diff-report.sh` の判定は **NO_CHANGES**
 
 補足（未確認・二次情報）
 
-Web検索では、**10月10日付の新しい発表は見つかりませんでした。** 挙がったもののうち一次ソースの差分に無いものは以下です。**未確認**です（このクラウド環境から anthropic.com / claude.com への接続はブロックされています）。
+Web検索でも、**10月11日付の新しい発表は見つかりませんでした。** 出てきたのは10月6日・7日の既報（Haiku 5.5、Max と Team プランの月次 API クレジット、Claude for Startups の拡充）だけです。
 
-- **利用規約（usage policy）の更新**が **10月8〜9日**頃、という記述。「モデルに対する持続的で不必要な虐待的・残虐な振る舞い」を禁じる内容を加えた、とされています。報道では「**Claude 自身がそうした対話を終える能力が、主要な執行手段のままである**」と規約に書かれている、とも書かれています
-- **Genesis Mission** について、Claude・Claude Code・API クレジットを数百の研究プロジェクトに提供する、という記述（昨日も挙がっていました）
-- Claude for Startups の発表が 10月6日（火）という記述
+Max と Team プランの月次 API クレジットについて、検索結果に「**Claude Platform で自分のアプリやエージェントを動かすため**」という目的の記述がありました。10月7日の一次情報（Platform リリースノート）には用途の記載がなかった部分なので、これは **未確認**として置いておきます。
 
-過去数日から持ち越しの未確認分（Claude for Government、Claude Frontier Academy、「Claude 主導」の生物学的発見、Project Glasswing の 129,000件、Claude Code projects のベータ、Claude Design / Slides / Docs、Claude for Small Business、Claude for Financial Advisors）は、今日も一次ソースに現れていません。**引き続き未確認**です。
+過去数日から持ち越しの未確認分（Claude for Government、Claude Frontier Academy、「Claude 主導」の生物学的発見、Project Glasswing の 129,000件、利用規約の更新、Genesis Mission、Claude Code projects のベータ、Claude Design / Slides / Docs、Claude for Small Business、Claude for Financial Advisors）は、今日も一次ソースに現れていません。**引き続き未確認**です。
 
 ---
 
 ## 運用メモ
 
-リポジトリは `2f29f90`（10/10 分）まで送信済みです。今日の分もこのあと push します。
+リポジトリは `e77fda8`（10/11 分）まで送信済みで、未 push はありません。今日の分もこのあと push します。
 
 ---
 
