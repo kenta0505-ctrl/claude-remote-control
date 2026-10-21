@@ -1,119 +1,133 @@
 <!-- このファイルは scripts/finalize.sh が自動生成します。直接編集しないでください。 -->
-<!-- 編集する場合は digests/2026-10-21.md を直してから finalize.sh を再実行してください。 -->
+<!-- 編集する場合は digests/2026-10-22.md を直してから finalize.sh を再実行してください。 -->
 
-# 2026-10-21（水）Claude 更新ダイジェスト
+# 2026-10-22（木）Claude 更新ダイジェスト
 
 ## ① 今日の要点
 
-- **「Routines」が「scheduled tasks（予定タスク）」に改名されました。** ドキュメントのタイトルが変わり、本文に「formerly routines（旧称 routines）」と明記されています。原さんが使う用語に直接関わります。
-- **【訂正】10月10日にお伝えした「Amazon Bedrock では Haiku 5.5 で構造化出力が使えない」という記述が、Anthropic 側から削除されました。**
-- **昨日お伝えしたツール検索の既定オンが、不具合を起こしていました。** 2.1.304 のリグレッション（それまで動いていたものが壊れた）として修正されています。
-- **サンドボックスの保護を意図的に迂回できる設定**が追加されました（`sandbox.allowNestedUserNamespaces`）。
-- Claude Code は **2.1.305**（前日 2.1.304）。報告対象 35件の小さめの日。
-- **`/artifacts` の削除確認が、昨日から1日でまた変わりました。** `y` と `n` が効かなくなりました。
+- **新しい API バージョン `2026-10-21` が出ました。** `temperature`・`top_p`・`top_k` が **全モデルで使えなくなります**（400 エラー）。これまで「Claude 4.7 以降では使えない」だった制限が、**バージョンを上げると全モデルに及びます**。
+- **各 SDK のメジャーバージョンが上がり、ライセンスが MIT から Apache 2.0 に変わりました。**
+- **user profiles（利用者プロファイル）が追加**されました。API の呼び出しを「自分のどのお客さん向けか」で区別でき、**安全上の措置が組織全体ではなくその1人に適用される**ようになります。
+- **組織の管理者が、組織全体で web fetch をオフにできる**ようになりました。ドメインの許可・拒否も設定できます。
+- Claude Code は CHANGELOG が **2.1.306**、npm が **2.1.307**。食い違っています（⑤に書きます）。
+- 価格表は**文章の書き方の整理だけ**で、数字は1つも動いていません。
 
 ---
 
 ## ② ⚠️ 今の使い方が変わるもの
 
-### 1. 「Routines」が「scheduled tasks（予定タスク）」に改名されました
+### 1. 新しい API バージョン `2026-10-21`。`temperature` 等が全モデルで使えなくなります
 
-Claude Code のドキュメントのタイトルと説明文が書き換わりました。
+**今日いちばん重い項目です。** API バージョンを上げると、以下が壊れます。
 
-- 旧タイトル: 「**Automate work with routines**（routines で作業を自動化する）」
-- 新タイトル: 「**Automate work with scheduled tasks**（予定タスクで作業を自動化する）」
+**① サンプリングのパラメータが削除されました**
 
-説明文の変化です。
+**`temperature`・`top_p`・`top_k` を送ると、既定値であっても 400 エラーになります。**
 
-- 旧: 「Claude Code を自動操縦に。スケジュール、API 呼び出し、クラウド基盤からの GitHub イベントで動く **routines** を定義する」
-- 新: 「Claude Code を自動操縦に。**旧称 routines の scheduled tasks** を作る。クラウドで、スケジュール・API 呼び出し・GitHub イベントで動く」
+移行ガイドの説明を、そのまま訳します。
 
-**「formerly routines（旧称 routines）」と明記**されているので、**同じ機能の名称変更**です。URL（`docs/en/routines.md`）は変わっていません。
+> これらのパラメータなしでは、リクエストはそれらの既定値（`temperature` は 1.0 を含む）でサンプリングされます。これは、それらを省いた `2023-06-01` のリクエストと同じです。**既定値しか受け付けないモデル（Claude 4.7 以降）は、以前と同じようにサンプリングします。** 他の値を受け付けるモデル（Claude Sonnet 4.6 など）では、**より一貫した出力のために `temperature` を下げていたリクエストは、その効果を失います。代わりになる設定はありません。** 既定値以外の値に依存しているリクエストがある場合は、そのパラメータを送るのをやめるか、**そのリクエストだけ `2023-06-01` に留める**かのどちらかです。
 
-原さんが使っているのは、この機能です。**今後 Claude Code の画面や文書で「scheduled task」という表記を見たら、これまでの「Routine」と同じものを指します。**
+つまり **「Sonnet 4.6 以前で temperature を下げて出力を安定させていた人は、その手段を失う」** ということです。代替はありません。
 
-**ただし、今日の時点で以下は確認できていません。**
+**② assistant メッセージの中の document ブロックがエラーになります**
 
-- claude.ai の画面（Routine の一覧やページ）の表記が変わったかどうか
-- Claude Code の CHANGELOG には、この改名についての項目がありません（ドキュメントの目次の変化だけで分かりました）
+`assistant` のメッセージに直接 `document` ブロックを置くと 400 エラーになります。**`user` メッセージに入れてください。** 別のブロックの中に入れ子になった document（Claude が返した web fetch の結果など）は、引き続き受け付けられます。
 
-この digest セッションでは、**原さんが使ってきた「Routine」という語を引き続き使います。** 変えた方がよければ言ってください。
+**③ user メッセージの中の citations がエラーになります**
 
-気になるなら聞けること: 「自分の画面でも名前が変わってるか、見ておいた方がいい?」
+`user` メッセージの `text` ブロックに、中身のある `citations` の配列を送ると 400 エラーになります（`search_result` ブロックの中も含む）。**`assistant` メッセージの `text` ブロックの citations（Claude の以前の返答を送り返す場合など）は引き続き受け付けられます。** 文書や検索結果への `"citations": {"enabled": true}` の設定も同様です。
 
-### 2. 【訂正】Haiku 5.5 の Bedrock での構造化出力の記述が削除されました
+**④ Admin API と Enterprise Analytics API で、古い項目名が返らなくなります**
 
-**10月10日**のダイジェストの②で、Haiku 5.5 で壊れるコードの一覧として、こう書きました。
+名前が変わった項目について、**古い名前が応答に含まれなくなります**。
 
-> 6. **Amazon Bedrock では、Haiku 5.5 で構造化出力（structured outputs）が使えません**（新規）
+| API | 旧名 | 新名 |
+|---|---|---|
+| RBAC グループ | `roles` | `role_ids` |
+| RBAC グループのメンバー | `group_id` | `rbac_group_id` |
+| RBAC の役割 | `name` | `display_name` |
+| 組織とワークスペースのレート上限 | `group_type` | `group.type` |
+| APIキー | `workspace_id` | **`scope`**（値の意味が変わります。下記） |
+| ユーザー別の使用量・費用レポート | `actor.email` | `actor.email_address` |
+| 活動の要約 | `summaries` | `data` |
 
-**Platform リリースノートの同じ項目から、この一文が今日の取得で削除されていました。** 原文の変化です。
+**APIキーの `workspace_id` は、単なる改名ではありません。**
 
-- 旧: 「… A request that sends thinking blocks back after a change to `system`, `tools`, or earlier turns can also return a 400 error. **On Amazon Bedrock, structured outputs aren't available for Claude Haiku 5.5.** Adaptive thinking is on by default …」
-- 新: 「… A request that sends thinking blocks back after a change to `system`, `tools`, or earlier turns can also return a 400 error. Adaptive thinking is on by default …」
+- 旧（`2023-06-01`）: そのキーが紐づくワークスペースの ID。**既定ワークスペースに紐づくキーと、1つのワークスペースに紐づかないキー（全ワークスペース用のキー）は `null`**
+- 新（`2026-10-21`）: `workspace_id` は削除。代わりに **`scope`** を読む。ワークスペースに紐づくキー（既定ワークスペースを含む）は **`scope.workspace_id` に実際の ID が入る**。全ワークスペース用のキーは **`scope` が `{"type": "organization"}`** で `workspace_id` を持たない
 
-**つまり「Bedrock で構造化出力が使えない」という制約が、記述から消えました。** 使えるようになったのか、記述自体が誤りだったのかは、今日の資料からは分かりません。
+**`null` を「既定ワークスペース」として扱っていたコードは、`scope.workspace_id` を既定ワークスペースの ID と比べる形に書き換える必要があります。**
 
-10月10日に私が書いた内容は、その時点のリリースノートの通りでしたが、**今は書かれていません。** 訂正します。
+**⑤ Amazon Bedrock には制約があります**
 
-### 3. 昨日お伝えしたツール検索の既定オンが、不具合を起こしていました
+移行ガイドの警告です。
 
-昨日（10/20）のダイジェストの②で、こう書きました。
+> **Amazon Bedrock では、`2026-10-21` は Claude 4.7 以降のモデルでのみ利用可能です。** Bedrock でそれより古いモデルを呼んでいる場合は、今使っている SDK のバージョンに留まるか、API バージョンを自分で設定しているなら今送っているバージョンを送り続けてください。それらの呼び出しを `2026-10-21` に移すには、**まず Claude 4.7 以降のモデルに切り替えてください。**
 
-> **カスタム `ANTHROPIC_BASE_URL`（自前のゲートウェイ）を使っている環境で、ツール検索が既定でオン**になりました。**ゲートウェイが 400 または 422 を返した場合は、ツール検索なしで再試行されます。**
+**原さんへの関係**: 原さんは claude.ai とアプリ経由で Claude Opus 5 を使っているので、**API バージョンを自分で指定する立場にありません。直接の影響はありません。** ただし Opus 5 は Claude 4.7 以降の世代なので、`temperature` 等は既定値しか受け付けない側です。
 
-**その再試行が、十分でなかったことが分かりました。** 今日の原文です。
+### 2. 各 SDK のメジャーバージョンが上がり、ライセンスが変わりました
 
-> Fixed every request failing on Vertex, Bedrock and other providers when the endpoint or a gateway rejects tool search, and behind gateways with ToolSearch disallowed or left out of `--tools` (a **2.1.304 regression**): Claude Code now retries without it
+**`2026-10-21` を既定で送る新しいバージョン**です。
 
-**Vertex・Bedrock・その他のプロバイダで、エンドポイントやゲートウェイがツール検索を拒否すると、すべてのリクエストが失敗していました。** また **ゲートウェイ配下で ToolSearch が許可されていない、または `--tools` に含まれていない場合**も同様でした。
+| SDK / CLI | 新バージョン |
+|---|---|
+| Python | **2.0.0** |
+| TypeScript | **1.0.0** |
+| C# | **13.0.0** |
+| Go | **2.0.0** |
+| Java | **3.0.0** |
+| PHP | **1.0.0** |
+| Ruby | **2.0.0** |
+| `ant` CLI | **2.0.0** |
 
-**「2.1.304 のリグレッション」と明記されています。** つまり昨日の変更が原因で壊れた、ということです。**今は、ツール検索なしで再試行されます。**
+**ライセンスが MIT から Apache 2.0 に変わりました。** リリースノートに「API バージョンに依存しない破壊的変更も含まれる」と明記されています。
 
-昨日の報告自体は CHANGELOG の通りでしたが、**その変更に不具合が含まれていたことを今日追記します。**
+移行ガイドが挙げている SDK 側の変更です（API バージョンとは別の話）。
 
-### 4. サンドボックスの保護を意図的に迂回できる設定が追加されました
+- **`MessageParam` が、役割ごとに1つの型を持つ union になりました**
+- **1つしか値がない enum が定数になりました**
+- **ツールランナーからクライアント側の圧縮が削除されました**
+- **Text Completions が削除されました**
+- **非 beta の Models メソッドから `betas` が削除されました**
+- **APIキーが `Authorization: Bearer` で送られるようになりました**
+- **1つのクライアントが持つ資格情報は1つだけになりました**
 
-**`sandbox.allowNestedUserNamespaces`** が追加されました。原文がかなり率直です。
+**Go と TypeScript には追加の注意があります。**
 
-> Added `sandbox.allowNestedUserNamespaces` so sandboxed commands on Linux can create user namespaces (Chromium, rootless podman); **this lets them get around the sandbox's file protections**
+- **Go**: モジュールのパスが `github.com/anthropics/anthropic-sdk-go/v2` に変わります。**各 import を書き換える必要があります。** CLI も `github.com/anthropics/anthropic-cli/v2` になり、**古いパスは警告もエラーもなく v1 の最新版を入れ続けます**
+- **TypeScript**: `@anthropic-ai/bedrock-sdk`・`vertex-sdk`・`foundry-sdk`・`aws-sdk`・`google-cloud-sdk` の v1 は `@anthropic-ai/sdk` の v1 を必要とします。**同時に上げないと、パッケージマネージャが古い `@anthropic-ai/sdk` を2つ目として入れます**
 
-**Linux のサンドボックス内のコマンドが、ユーザー名前空間（user namespace）を作れるようになる設定**です。用途として Chromium と rootless podman が挙げられています。
+### 3. 組織の管理者が、web fetch を組織全体でオフにできるようになりました
 
-**そして「これにより、それらのコマンドはサンドボックスのファイル保護を迂回できる」と明記されています。**
+Claude Console の **「Capabilities」ページ**で設定します。
 
-つまり **「サンドボックスの中で Chromium などを動かすには、サンドボックスの保護を一部諦める必要がある」** という取引を、設定として選べるようになった、ということです。既定ではオフです。
+- **web fetch をオフにすると、web fetch ツールを含む Messages API のリクエストは 400 エラーで失敗します**
+- **Claude Managed Agents のセッションでは、`web_fetch` の呼び出しがエージェントにエラーの結果を返します**
+- **オンのままでも、同じページで web fetch の許可ドメイン・拒否ドメインを設定できます**
 
-### 5. `allowedMcpServers` の除外が効かなくなるケースがあります
+Managed Agents では、**組織のドメイン制限とエージェント自身の `allowed_domains` / `blocked_domains` の両方を通らなければなりません**（リダイレクトで到達した URL も含む）。
 
-**既存の設定が効かなくなる変更です。**
+**web search についても同じ仕組みが既に動いていた**ことが、今日明記されました。
 
-**`allowedMcpServers`（許可する MCP サーバーの一覧）が、`managed-mcp.json` の stdio サーバーのうち、`env` の中でだけ `${VAR}` を使っているものを、絞り込みの対象から外す**ようになりました。
+- **「Allow web search」の設定は 10月6日から**
+- **web search のドメイン制限は 10月14日から**
 
-原文の意味するところ: **「許可リストに入れていなかったサーバーが、アップグレード後に読み込まれるようになる」**。**止めたい場合は `deniedMcpServers`（拒否する一覧）を使う**よう案内されています。
+エージェントが受け取るのは、**組織のドメイン制限とエージェントの一覧の両方が許可した検索結果だけ**です。
 
-原さんは `managed-mcp.json` を使っていないと思われますが（組織管理用の設定ファイルです）、「許可リストに書いていないものが動き出す」という方向の変更なので記録しておきます。
+### 4. 価格表の数字は動いていませんが、表記が整理されました
 
-### 6. `/artifacts` の削除確認が、昨日から1日でまた変わりました
+**価格の数字は1つも変わっていません。** 変わったのは書き方だけです。
 
-昨日お伝えした内容です。
+- 金額に **「USD」を追記**（`$0.01` → `$0.01 USD`、`$10 per 1,000 searches` → `$10 USD per 1,000 searches` など）
+- **`10%` → `10 percent`**、**`50%` → `50 percent`** のように、記号を単語に
+- **「may」→「might」** に統一
+- 箇条書きの末尾に**句点を追加**
+- 「A one-hour coding session」→「A **1-hour** coding session」
+- 「Average web page」→「Average **webpage**」
 
-> **`/artifacts` の削除確認が、番号付きの選択肢**になりました。**1 または Enter で保持、2 で削除**。`y`・`n`・Esc も引き続き使えます
-
-**今日、`y` と `n` が効かなくなりました。**
-
-- **1 または Enter で保持**
-- **2 で削除**
-- **Esc で取り消し**
-- **`y` と `n` はもう答えになりません**
-
-1日で2回変わった箇所です。
-
-### 7. その他の挙動変更
-
-- **`CLAUDE_CODE_RETRY_WATCHDOG_USAGE_LIMIT_RECHECK_MS`** を追加。無人の再試行モードが、**使用上限がリセット前に解除された場合にそれに気づく**ようになります
-- Claude デスクトップアプリが**パスで読み込むプラグイン**が、組織の管理設定が `allowManagedPermissionRulesOnly` を設定している場合に、**`allowed-tools` を保持しなくなりました**
-- Mod の**固定パネルが、ターミナルの幅の45%以内に収まる**よう変更（より広いターミナルから引き継いだ幅も含む）
+**モデル廃止一覧（`model-deprecations.md`）とモデル概要（`models-overview.md`）にも、同じ種類の書き方の整理が入っています。** モデルの状態は何も動いていません。
 
 （継続中のものを再掲します。**単独版の Claude Design が 2026年12月14日に閉鎖**されます。**Claude Sonnet 4.5 が 2026年11月30日に API から停止**します。原さんの使用モデルは Claude Opus 5 なので後者の直接の影響はありません。）
 
@@ -121,132 +135,89 @@ Claude Code のドキュメントのタイトルと説明文が書き換わり�
 
 ## ③ 今日の変更（説明つき）
 
-### Slack のスレッドで設定した Routine が、投稿せずに「成功」と報告していた
+### user profiles — API の呼び出しを「自分のどのお客さん向けか」で区別できるようになりました
 
-Claude Tag（Slack 連携）の修正が2件、**どちらも Routine に関わるもの**です。
+**自分のサービスの中で Claude を使っている人（end customer）が誰なのかを、Anthropic に伝えられる**ようになりました。
 
-1. **Slack のスレッドで設定した Routine が、会話が終わった後、投稿せずに「成功」と報告していた**のが直りました。**今はそれらの実行が飛ばされ、作成者に伝えられます**
-2. **Slack の DM スレッドで設定した Routine が、同じスレッドの別の Routine が会話を再起動した後、投稿しなくなっていた**のが直りました。**今は両方とも投稿を続けます**
+**何のためか**がリリースノートに明記されています。
 
-1つ目は「動いたと報告されるが、実際には何も届いていない」という種類の不具合です。**原さんの Routine は Slack ではなくクラウドセッションなので該当しません**が、「成功と報告されたのに届いていない」という失敗の形があることは記録しておきます。
+> プラットフォームやゲートウェイを運営している場合、または API アクセスを再販している場合、**安全上の執行措置（enforcement action）が、組織全体ではなく1人のお客さんに適用されるようになります。**
 
-### Cowork のクラウドセッションの5分待ちが、まだ残っていました
+つまり **「自分のサービスの利用者の1人が規約違反をしたときに、サービス全体が止められるのではなく、その1人だけが止められる」** という仕組みです。
 
-**昨日**お伝えした修正の続きです。
+**`/v1/user_profiles` のエンドポイント**が追加され、SDK と `ant` CLI も対応しています。
 
-- 昨日: 「予定された Cowork のクラウドセッションが、WebFetch で URL の承認が必要になったサブエージェントごとに、また5分待っていた」のを修正
-- 今日: 「**同じ問題のさらに多くのケース**」を修正（`Fixed more cases of ...`）
+**あわせて、プロファイルの状態を調べる手段も追加されました。**
 
-2日連続で同じ箇所が直されています。1回では塞ぎきれなかった、ということになります。
+- **`enforcement_status`** と **`enforcement_actions`** の項目がプロファイルに追加され、**Anthropic が自分のお客さんを制限（restrict）したか禁止（ban）したかが分かる**ようになりました
+- **`enforcement_status[]` のフィルタ**で、制限や禁止が有効なプロファイルだけを一覧できます
 
-### Workflow の再開が、完了済みのエージェントを再実行していた
+### 組織の webhook が追加されました（beta）
 
-**Workflow の再開（resume）が、すでに完了した `pipeline()` と `parallel()` のエージェントを、実行の記録（journal）から読み出す代わりに、もう一度実行していた**のが直りました。
+**Admin API に組織の webhook が追加**されました。`webhooks-2026-10-07` のベータヘッダが必要です。
 
-「再開」と言いながら、終わった作業をやり直していたことになります。費用と時間の両方が無駄になる種類の不具合です。
+**`/v1/organizations/webhooks` のエンドポイント**で、**2種類のイベント**の通知先を登録します。
 
-### `/usage` の警告が、1行の修正案になりました
+1. **Anthropic が組織の user profile を制限・禁止したとき**
+2. **その制限・禁止が終わったとき**
 
-**`/usage` の各警告が、出どころを名指しした1行の修正案**になりました。**`f` キーを押すとその修正が適用されます。**
+**アクセスを求めるには、Anthropic の担当チームに連絡**するよう案内されています。
 
-**同じ修正案が、VS Code と `/doctor` にも出ます。**
+### SDK のバージョンを JSON で取れるようになりました
 
-10月15日に「`/usage` に、max effort・ワークフロー・常時オンのコンテキスト・大きなツール結果についての警告を追加」とお伝えしましたが、**今日はその警告に「直し方」と「適用ボタン」が付いた**形です。
+Platform ドキュメントに、以下の案内が追加されました。
 
-### 圧縮が古いメッセージを落としたことが、Claude に伝わっていなかった
+> 各 Claude Platform SDK と `ant` CLI の最新バージョンは、`https://platform.claude.com/docs/sdk-versions.json` で JSON として取得できます。
 
-**クラウドセッションとチームメイトが、圧縮（会話の要約圧縮）が収まりきらずに最も古いメッセージを要約から除外したとき、それを Claude に伝えていなかった**のが直りました。
+バージョンを自動で確認したい場合に使えるものです。
 
-Claude が「全部の履歴が要約に入っている」と思い込んだまま作業する、という状況が起きていたことになります。
+### Claude Code は2件だけ
 
-### Inference hooks が beta を終えました
+CHANGELOG の 2.1.306 は2項目だけです。
 
-**Inference hooks**（推論フック）が、**Claude Enterprise 組織向けに beta を終えました**。Platform リリースノートの10月20日付の項目です。
+1. **クラウドセッションの中で `claude -p` を、そのセッションの環境変数なしで起動すると「Not logged in」と報告されていた**のが直りました
+2. **MCP ツールが多いセッションで、API のエラーが「prompt is too long」に置き換えられ、不要な圧縮が行われていた**のが直りました
 
-内容の説明はリリースノートに書かれておらず、専用ページへのリンクだけです。**何をするものなのかは、今日の資料からは分かりません。**
-
-### モデル一覧 API に `thinking.types.between_tools` が追加
-
-**各モデルが `thinking: {type: "between_tools"}` を受け付けるかどうか**を返す項目が追加されました。これは **「前置きの思考（up-front thinking）をオフにする」** 設定です。
-
-- `supported` が `false` なのは、そのモデルが `"between_tools"` を 400 エラーで拒否する場合
-- **`true` でも、別の理由で API が拒否することはある**と明記されています（たとえば `"between_tools"` と併用できない effort レベルが指定されている場合）
-
-**具体例が1つ挙げられています。** Claude Sonnet 5.5 については、モデル一覧 API が **`thinking.types.between_tools.supported` を `true`、`thinking.types.disabled.supported` を `false`** と報告します。
-
-10月5日に追加された `thinking.types.disabled`（思考を完全にオフにする）と対になる項目です。**Sonnet 5.5 は「完全オフはできないが、前置きの思考だけオフにはできる」**という読み方になります。
-
-### 起動時の警告の出し方が変わりました
-
-**起動時の警告が、ロゴの上に生のテキストとして表示されていた**のが直りました。
-
-- **警告はデバッグログに送られる**ようになりました
-- **何も制限していない許可ルール**については、**バナーの下に警告の行として表示**されます
+2つ目は、**本来の原因（API のエラー）が隠され、見当違いの対処（圧縮）が走っていた**という種類の不具合です。
 
 ---
 
 ## ④ 一行で流すもの
 
-Claude Code 2.1.305 の残りです。判断は原さんに委ねます。
+**Claude Code 2.1.306**（2項目、どちらも③に記載。VSCode の項目はありません）
 
-### 設定・モデル
+**Platform ドキュメント（新設されたページ）**
 
-- `/effort` と `/autocompact` の設定が、モデル名が `modelOverrides` の値と**大文字小文字、または `[1m]` のタグだけ違う**場合に適用されていなかったのを修正
-- Claude が、サブエージェントが代替モデルに切り替わった後、**そのサブエージェントの作業について間違ったモデル名を挙げていた**のを修正
+- **user profiles 関連**: `manage-claude/user-profiles`、`manage-claude/user-profiles-verification-portal`、`api/user_profiles`（+ `create` / `list` / `retrieve` / `update` / `delete` / `action_urls` / `action_urls/create`）、`api/beta/user_profiles/delete`、`api/beta/user_profiles/action_urls`（+ `create`）
+- **組織の webhook 関連**: `manage-claude/organization-webhooks`、`api/beta/organization/webhooks`（+ `create` / `delete` / `list` / `retrieve` / `update` / `regenerate_signing_secret`）
+- **ワークスペースのレート上限の更新**: `api/organization/workspaces/rate_limits/update` と `api/beta/.../update`（**設定を書き換えるエンドポイントが追加**されました。これまでは一覧と取得だけでした）
+- **SDK バージョンの JSON**: `docs/sdk-versions.json`
 
-### MCP
+**Platform リリースノート（既存項目の整理）**
 
-- クラウドセッションや SDK の `setMcpServers` で渡した MCP サーバーが、**セッションの途中で、自分の設定にある同名のサーバーに置き換えられていた**のを修正
-- MCP の同意ダイアログを改善（**入力欄に向けて押した Enter が、Accept として取られにくくなった**）
+- OpenTelemetry エクスポートの項目の「observability backend」→「observability **platform**」
+- Managed Agents の予定配備の項目が、箇条書きの記号を他と揃えて `*` に統一
 
-### worktree・ファイル
+**モデル廃止一覧（`model-deprecations.md`）の書き方の整理**
 
-- ベアリポジトリの新しい worktree が、既定のブランチではなく**ローカルの HEAD から始まる**ことがあったのを修正。あわせて、**変更のないサブエージェントの worktree が片付けられない**ことがあったのも修正
-- ディスクが満杯のときの Bash コマンドが、**生の `ENOSPC` のファイルパス**で失敗していたのを修正（今は「ディスクが満杯で、何も実行されなかった」と伝える）
+モデルの状態は何も動いていません。変わったのは文章の書き方です。
 
-### Remote Control
+- 「Legacy」の説明が「may be deprecated」→「**might** be deprecated」
+- 「Retired」の説明が「Requests to retired models **will fail**」→「Requests to retired models **fail**」
+- 「Migration guide」→「**Migration guides**」（複数形に、2か所）
+- 「customers can access an audit」→「**you** can access an audit」
+- 「This audit **will help** you locate」→「This audit **helps** you locate」
+- 「if you need **assistance** with migration」→「if you need **help** with migration」
+- モデル廃止のリスクの箇条書き3件に**句点を追加**
+- 「Claude Haiku 3 **model** of its upcoming retirement」から **「model」を削除**（4か所: Haiku 3、Haiku 3.5、Sonnet 3.7、Opus 3）
+- **パラメータ廃止の説明が書き換わりました**（②に記載）。旧: 「ほとんどの SDK は非推奨のパラメータをリクエストの型に残しているので、既存のコードは型チェックを通る。Python SDK（v1.0 以降）は `temperature`・`top_p`・`top_k` を削除しているので、渡すと `TypeError` になる」→ 新: 「**新しいモデルは非推奨のパラメータを拒否しうる。新しい API バージョンは、全モデルについてそれを削除しうる**」
 
-- Remote Control が、`/resume` で会話を切り替えた後、`/resume` の一覧に**空の「(session)」の項目を残していた**のを修正
-- spawn モードのメッセージを改善（`w` を押すと**新しいモードがそのフォルダ用に保存された**と伝え、後で `claude remote-control` が保存済みのモードで起動したときは**それがどこから来たか**を伝える）
+**モデル概要（`models-overview.md`）の書き方の整理**
 
-### 画面・入力
-
-- `/usage` の行が、狭いターミナルで途中で切れていたのを修正
-- スクリーンリーダー（読み上げ）対応の修正2件:
-  - 検索欄が、VoiceOver が「telephone recorder」と読む記号ではなく **「Search:」と言う**ようになりました
-  - 強調表示されたプロンプトのテキスト（Ctrl+R の検索一致や "ultrathink" など）に、**単語の中に空白が入らなくなりました**
-- Mod の `Image` を改善（**iTerm2 3.5 以降で、全画面表示のときに `alt` テキストだけでなく画像そのものが描かれる**ように）
-
-### 自己ホストランナー（3件）
-
-- 標準出力だけをランナーやオーケストレータと共有する起動スクリプトが、**`TERM` が設定されていると `Resource temporarily unavailable` で失敗していた**のを修正（**2.1.300 のリグレッション**）
-- **2.1.296 以降**、git の資格情報ヘルパーや askpass プログラムが **`GIT_CONFIG` 経由で設定を読む場合に、リポジトリへのアクセスが失敗していた**のを修正
-- オーケストレータが、**バックグラウンドで起動したランナーが出力を開いたままにしていると、spawn-runner フックをタイムアウトと報告していた**のを修正
-
-### VSCode 拡張（3件）
-PROFILE.md の取り決めにより省略しています。
-
-### クラウドセッション（2件）
-- クラウド環境の管理ページが、既存の環境の保存を「installs packages」エラーで誤って拒否していたのを修正
-- 自己ホスト環境の削除を改善（**何が削除を妨げているか、何に影響するか**をダイアログとエラーメッセージが伝える）
-
-### Claude Tag（Slack 連携、③で触れていない分）
-- Claude が参加していない公開 Slack チャンネルが、管理設定の「Add place」の検索に出るようになりました（管理者がそこから設定できる）
-- アクセスバンドルで、**別の GitHub アカウントに移動したリポジトリを再度追加できる**よう修正
-- 大きな組織の管理ページで、**チャンネルの一覧が読み込み中でも、プラグイン・スキル・バンドルの編集ができる**よう改善
-
-### Code Review（2件）
-- レビュー中に複数の push がプルリクエストに届いたとき、**最新のコミットをレビューしないことがあった**のを修正
-- 再レビューが、**以前の遮断する指摘がまだ開いているのに LGTM で始まる**のをやめるよう変更
-
-（10月17日に「再レビューが、以前の指摘がまだ開いているのに『問題なし』と言っていたのを修正」とお伝えしましたが、**今日は「LGTM で始まる」部分の修正**です。4日で2件目になります。）
-
-### ドキュメント
-
-- **Routines → scheduled tasks の改名**（②に記載）
-- Platform ドキュメントに2ページ新設: `api/compliance/organizations/user_preferences` と その `list`（**10月16日にお伝えした「Compliance API が各メンバーの『Claude への指示』を取得できるようになった」** に対応するリファレンスページです）
-- 英語のページ数が 783 → **785**、他11言語が 288 → **289**
-- Platform リリースノートの既存項目の文面が3か所整理されました（Workbench の記述に「in the Console」を追記、Console の Cost ページの記述の語順、Haiku 5.5 の移行の記述から Bedrock の構造化出力の一文を削除 ← ②に記載）
+- 「see **Anthropic's [Transparency Hub]**」→「see Anthropic's **[Transparency Hub]**」（リンクの範囲の変更）
+- 「you **may** notice larger improvements」→「you **might** notice」
+- 「If you're ready to start exploring what Claude can do for you, dive in! Whether you're...」の**前半（「さあ飛び込もう！」の呼びかけ）が削除**され、「Whether you're...」から始まるように
+- 「**reach out to** the support team」→「**contact** the support team」
 
 ---
 
@@ -254,14 +225,24 @@ PROFILE.md の取り決めにより省略しています。
 
 | 項目 | 今日 | 前日 |
 |---|---|---|
-| Claude Code（npm） | 2.1.305 | 2.1.304 |
-| CHANGELOG 最新 | 2.1.305 | 2.1.304 |
-| CHANGELOG の新規項目 | 38 | 77 |
-| うち報告対象 | **35**（VSCode 3件を除く） | 71 |
-| Platform リリースノートの新規項目 | 2（+ 既存3件の文面整理） | 0 |
-| 変更のあったソース | 6 / 8 | 2 / 8 |
+| Claude Code（npm） | **2.1.307** | 2.1.305 |
+| CHANGELOG 最新 | **2.1.306** | 2.1.305 |
+| CHANGELOG の新規項目 | 2（VSCode 0件） | 38 |
+| Platform リリースノートの新規項目 | **9**（10月21日付5件、10月20日付4件） | 2 |
+| 変更のあったソース | 7 / 8 | 6 / 8 |
 
-モデルの状態: `model-deprecations.md` は **変更なし**です。`models-overview.md` は変わりましたが、追加されたのは上記 `thinking.types.between_tools` の説明文だけで、**モデルの一覧そのものは動いていません**。
+**バージョンが食い違っています。** npm は **2.1.307** を最新と報告していますが、**CHANGELOG には 2.1.306 までしかありません。** 2.1.307 の内容は、今日の時点では公開されていません。これまで何度かあった「npm が先に進む」パターンです。明日の取得で 2.1.307 の項目が出てくるかどうか確認します。
+
+**新しい API バージョン**
+
+| 項目 | 値 |
+|---|---|
+| バージョン | **`2026-10-21`** |
+| 送り方 | `anthropic-version: 2026-10-21` ヘッダ、または対応 SDK のメジャーバージョン |
+| 以前のバージョン | `2023-06-01` |
+| 移行ガイド | `platform.claude.com/docs/en/api/migration-2026-10-21` |
+
+モデルの状態: **現行・廃止予告・停止済みの区分に変更はありません。** 文章の書き方が整理されただけです。
 
 | モデル | 状態 | 停止日 |
 |---|---|---|
@@ -282,9 +263,9 @@ PROFILE.md の取り決めにより省略しています。
 | claude-haiku-4-5-20251001 | 現行 | 2026-10-15 以降（過ぎました） |
 | claude-opus-4-1 / 4, claude-sonnet-4, claude-3-7-sonnet, claude-3-5-haiku, claude-3-haiku | 停止済み | — |
 
-**Claude Haiku 4.5 について**: 期限（10月15日）を過ぎて6日目です。**廃止予告は今日時点でも出ていません。**
+**Claude Haiku 4.5 について**: 期限（10月15日）を過ぎて7日目です。**廃止予告は今日時点でも出ていません。**
 
-価格表（`pricing.md`）も **変更なし**です。
+価格表（`pricing.md`）: **数字は1つも動いていません。** 文章の書き方の整理だけです（②に記載）。
 
 ---
 
@@ -292,29 +273,32 @@ PROFILE.md の取り決めにより省略しています。
 
 取得できた一次情報
 
-- Claude Code CHANGELOG（2.1.305）
-- Claude Code ドキュメント目次（**Routines → scheduled tasks の改名**。URL の追加・削除はなし）
-- Claude Platform リリースノート（10月20日付に Inference hooks の beta 終了が1件、10月19日付に `thinking.types.between_tools` が1件。**既存の Haiku 5.5 の移行の項目から1文が削除** ← ②の訂正の根拠です）
-- Claude Platform ドキュメント目次（`api/compliance/organizations/user_preferences` 系2ページの新設）
-- モデル概要（`models-overview.md`）— `thinking.types.between_tools` の説明文が追加
-- モデル廃止一覧（`model-deprecations.md`）— 変更なし
-- 価格表（`pricing.md`）— 変更なし
-- npm `@anthropic-ai/claude-code` 最新版情報
+- Claude Code CHANGELOG（2.1.306）
+- npm `@anthropic-ai/claude-code` 最新版情報（**2.1.307。CHANGELOG と食い違っています**）
+- Claude Platform リリースノート（10月21日付5件、10月20日付4件）
+- **Claude Platform ドキュメント「Migrating to API version 2026-10-21」本文**（`platform.claude.com/docs/en/api/migration-2026-10-21`）— ②の破壊的変更の一覧と Bedrock の警告は、このページからの引用です
+- Claude Platform ドキュメント目次（user profiles と組織 webhook 関連の多数のページ新設、ワークスペースのレート上限の更新エンドポイント、SDK バージョンの JSON）
+- 価格表（`pricing.md`）— 書き方の整理のみ
+- モデル廃止一覧（`model-deprecations.md`）— 書き方の整理と、パラメータ廃止の説明の書き換え
+- モデル概要（`models-overview.md`）— 書き方の整理のみ
+- Claude Code ドキュメント目次 — 変更なし
 
 補足（未確認・二次情報）
 
-Web検索では、**10月20日付の新しい発表は見つかりませんでした。** 新しく挙がった項目が1つあるので書きます。**未確認**です（このクラウド環境から anthropic.com / claude.com への接続はブロックされています）。
+Web検索で、**今日の一次情報を裏付ける第三者の記事**が出ました。日付について1点ずれがあるので書きます。**いずれも未確認**です（このクラウド環境から anthropic.com / claude.com への接続はブロックされています）。
 
-- **サソリの神経毒に対するタンパク質結合体の設計**という記述。**Claude が 318,484 のタンパク質設計を生成し、180 を試験用に選び、Anthropic は211の設計と結合データのすべてを公開する**、とされています。引用元は「today（公開日当日）」としています。**数字（318,484 / 180 / 211）の内訳が一致していないように見える**ので、引用元の記述をそのまま写しました。**事実として扱わないでください**
-- **Anthropic Public Benefit Fund**（10月19日）について、昨日の記述に加えて「**拠出分は、その市場価値とともに増えうる**」という記述が出ました
+- **user profiles の仕組みについて**: 「リクエストは **`anthropic-user-profile-id` ヘッダ**にプロファイルの ID を送って紐づける」「プロファイルには2種類あり、**`application`（既定）は個々のエンドユーザー、`passthrough` はそのプラットフォームが Claude アクセスを再販している会社**を表す」という記述。**API リファレンスからの引用**とされています
+- **料金とデータについて**: 「**プロファイルは無料で、価格は変わらない**」「プロファイルが保持するのは**開発者が送ったお客さんについての情報だけで、会話の内容ではない**」「**Anthropic はこれらの情報を検証しない**」という記述
+- **ベータヘッダについて**: `user-profiles-2026-03-24`、`user-profiles-2026-08-18`、`user-profiles-2026-09-04` が列挙され、**版によって項目名が違う**（たとえば `user-profiles-2026-09-04` では外部 ID が `external_user_details.reference_id` に入り、トップレベルの `external_id` ではない）という記述
+- **日付のずれ**: 「user profiles の公式リリースノートの項目は **10月20日付**」「API バージョン `2026-10-21` のリリースは **10月21日**」。**一次情報のリリースノートでも、user profiles は10月20日付、API バージョンは10月21日付になっています。一致しています**
 
-過去数日から持ち越しの未確認分（Claude for Government、Claude Frontier Academy の1億ドル、Claude Dashboards と Claude Motion の beta、Docs / Slides / Design の beta 終了と全プラン提供、Claude for Google Workspace、Project Glasswing の 129,000件、利用規約の更新、量子回路の研究、NIST 暗号のシード値の件、中間選挙への対応、Genesis Mission の1億5,000万ドル、Claude が Anthropic のモデル研究開発の26%を主導、ART 酵素の先行性をめぐる争い、Claude Code projects のベータ、Claude for Small Business、Claude for Financial Advisors、Claude Design の移行の詳細）は、今日も一次ソースに現れていません。**引き続き未確認**です。
+過去数日から持ち越しの未確認分（Claude for Government、Claude Frontier Academy の1億ドル、Claude Dashboards と Claude Motion の beta、Docs / Slides / Design の beta 終了と全プラン提供、Claude for Google Workspace、Project Glasswing の 129,000件、利用規約の更新、量子回路の研究、NIST 暗号のシード値の件、中間選挙への対応、Genesis Mission の1億5,000万ドル、Anthropic Public Benefit Fund、サソリの神経毒の研究、Claude が Anthropic のモデル研究開発の26%を主導、ART 酵素の先行性をめぐる争い、Claude Code projects のベータ、Claude for Small Business、Claude for Financial Advisors、Claude Design の移行の詳細）は、今日も一次ソースに現れていません。**引き続き未確認**です。
 
 ---
 
 ## 運用メモ
 
-リポジトリは `122701d`（10/20 分）まで送信済みです。今日の分もこのあと push します。
+リポジトリは `8291f12`（10/21 分）まで送信済みです。今日の分もこのあと push します。
 
 ---
 
