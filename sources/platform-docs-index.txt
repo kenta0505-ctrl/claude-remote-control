@@ -122,7 +122,7 @@ The full documentation is available in the following languages on https://platfo
 - [Token counting](https://platform.claude.com/docs/en/build-with-claude/token-counting.md)
 - [Tool combinations](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-combinations.md)
 - [Tool reference](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-reference.md)
-- [Tool Runner (SDK)](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-runner.md) - Tool runner (SDK)
+- [Tool runner (SDK)](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-runner.md)
 - [Tool search tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool.md)
 - [Tool use with prompt caching](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-use-with-prompt-caching.md)
 - [Troubleshooting](https://platform.claude.com/docs/en/agents-and-tools/mcp-tunnels/troubleshooting.md) - Troubleshoot MCP tunnels
@@ -201,7 +201,7 @@ The full documentation is available in the following languages on https://platfo
 - [Errors](https://platform.claude.com/docs/en/manage-claude/compliance-errors.md) - Handle Compliance API errors
 - [Overview](https://platform.claude.com/docs/en/manage-claude/inference-hooks.md) - Inference hooks
 - [Organizations, users, roles, groups, and settings](https://platform.claude.com/docs/en/manage-claude/compliance-org-data.md) - List organizations, users, roles, groups, and settings
-- [Manage WIF via API](https://platform.claude.com/docs/en/manage-claude/wif-admin-api.md) - Manage WIF with the Admin API
+- [Manage WIF with the Admin API](https://platform.claude.com/docs/en/manage-claude/wif-admin-api.md)
 - [Overview](https://platform.claude.com/docs/en/manage-claude/opentelemetry.md) - OpenTelemetry for the Claude API
 - [Organization webhooks (beta)](https://platform.claude.com/docs/en/manage-claude/organization-webhooks.md) - Organization webhooks
 - [Plugins API](https://platform.claude.com/docs/en/manage-claude/plugins-api.md)
