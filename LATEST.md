@@ -1,227 +1,270 @@
 <!-- このファイルは scripts/finalize.sh が自動生成します。直接編集しないでください。 -->
-<!-- 編集する場合は digests/2026-10-23.md を直してから finalize.sh を再実行してください。 -->
+<!-- 編集する場合は digests/2026-10-24.md を直してから finalize.sh を再実行してください。 -->
 
-# 2026-10-23（金）Claude 更新ダイジェスト
+# 2026-10-24（土）Claude 更新ダイジェスト
 
 ## ① 今日の要点
 
-- **Claude の API が Google Cloud 経由で使えるようになりました。** ただしこれまでの「Google 版 Claude」とは別物で、**中身は Anthropic 自身が動かす Claude API** です。支払いだけ Google Cloud の請求にまとまります。
-- Claude Code は **2.1.307（43項目、うち VSCode 7項目）** と **2.1.308（修正のみ1項目）**。昨日食い違っていた npm と CHANGELOG は**今日そろいました**。
-- Claude Code に **`/claude-api api-version` コマンドが追加**されました。昨日の新しい API バージョンへの書き換えを手伝ってくれるものです。
-- **MCP のツールが二重に実行されていた不具合**が直りました。
-- 価格表は **数字は1つも動いていません。**「USD」の追記と言い換えだけです。ただし **Fast mode の提供範囲の書き方が変わりました**（②に書きます）。
+- Claude Code が **2.1.309**。**79項目**（うち VSCode 10件、Slack の Claude Tag 5件）。
+- **いちばん多いのは「止めるはずの操作が通っていた」穴の修正で、11件まとまっています。** 実行を制限する仕組み（サンドボックス・権限チェック）が、回り道で抜けられていた、という種類のものです。
+- **Slack の @Claude（Claude Tag）を API で設定できるようになりました**（beta）。あわせて **「承認したチャンネル以外に投稿されていた」不具合**も直っています。
+- 昨日の **Google Cloud の2分割**が、各ドキュメントの表記に波及しました。**モデル一覧表に「Anthropic managed 版のモデル ID」の行が追加**されました。
+- **価格の数字は1つも動いていません。** 変わったのは「Google Cloud」という表記の置き換えだけです。
+- **昨日報告した価格表のコードブロックの表記変更（`json` → `text wrap`）は、今日元に戻りました。**
 
 ---
 
 ## ② ⚠️ 今の使い方が変わるもの
 
-### 1. Google Cloud 版の Claude が「2種類」に分かれました
+### 1. 「止めるはずの操作が通っていた」穴が11件、まとめて直りました
 
-これまで「Google Cloud の Claude」は1つでした（Vertex AI 経由のもの）。**今日から2つになり、名前も付き直しました。**
+**今日の修正でいちばん多い塊です。** Claude Code には、危ないことをさせないための2つの仕組みがあります。
 
-| 新しい呼び方 | 誰が動かしているか | 中身 |
-|---|---|---|
-| **Claude Models on Google Cloud (Anthropic managed)**（今日できた新しい方） | **Anthropic** | **Claude API そのもの。** Google Cloud のプロジェクト経由で届く |
-| **Claude Models on Google Cloud (Google managed)**（従来の Vertex AI 版） | **Google** | Google が提供する Claude |
+- **サンドボックス** = コマンドを隔離された場所で動かし、書き換えてよい場所を限る仕組み
+- **権限チェック** = コマンドを実行する前に「これを実行していいですか」と確認する仕組み
 
-**何が変わるのか**を、公式ドキュメントの説明をそのまま訳します。
+**この両方に、回り道で抜けられる穴がありました。** 以下はすべて 2.1.309 の修正です。**今まで通っていた操作が、今日から止まります。**
 
-> Claude Models on Google Cloud (Anthropic managed) は、**Anthropic が運用し、あなたの Google Cloud プロジェクト経由で到達する Claude API** です。
+> - **サンドボックスで動かす Bash コマンドが、毎回コマンドの前に、シェルの起動ファイルをサンドボックスの外で実行していた**のを修正
+> - **macOS のサンドボックスの `denyWrite`（書き込み禁止）のパターンが、パターンのフォルダにシンボリックリンク経由で到達する場合、パスの実際の場所に適用されていなかった**のを修正
+> - **サンドボックスのコマンドと、自動承認された編集が、`--mcp-config` で渡された MCP の設定ファイルを書き換えられた**のを修正
+> - **print モードと SDK のセッションで、無効にした MCP サーバーが、後の権限の確認によって再接続されていた**のを修正
+> - **Bash の権限チェックが、リダイレクトの開始に失敗しうるコマンドが設定した変数を信頼していた**のを修正
+> - **Bash の権限チェックが、git を実行する前にディレクトリを移動する複合コマンドのうち、`cd` が包まれていたり接頭辞が付いていたりするものについて、確認を求めていなかった**のを修正（素の `cd` の場合は求めていました）
+> - **`Edit(path)` の拒否ルールが、サブシェルも含むいくつかのコマンドで、そのパスへの Bash のリダイレクトを止めていなかった**のを修正
+> - **worktree で隔離されたセッションが、隔離の防護が拒否すべきロケール接頭辞付きのコマンドを受け付けていた**のを修正
+> - **zsh の worktree で隔離されたセッションが、隔離の防護が拒否すべき算術のコマンドを受け付けていた**のを修正
+> - **プロファイルストアの書き込み保護が、設定ディレクトリにシンボリックリンク経由で到達する場合に適用されていなかった**のを修正
+> - **Linux: バックグラウンドのコマンドがセッションより長く生き残ったときに、サンドボックスの書き込み禁止が解除されていた**のを修正
 
-**重要な区別が1つあります。** モデルの引退日（いつ使えなくなるか）の扱いが、この2つで違います。
+**シンボリックリンク（symlink）** = あるフォルダやファイルへの「別名の入口」です。**「本当の場所は禁止されているのに、別名の入口から入ると通ってしまった」** という形の穴が、今日2件直っています。
 
-モデル廃止一覧のページが、今日こう書き換わりました。
+**Windows についても1件あります。**
 
-- **旧**: 「このページの日付は Anthropic が運用するプラットフォーム（Claude API、Claude Platform on AWS、Microsoft Foundry）に適用されます。**パートナーが運用するプラットフォーム（Amazon Bedrock と Google Cloud）は独自の引退スケジュールを設定します**」
-- **新**: 「…（Claude API、Claude Platform on AWS、**Claude Models on Google Cloud (Anthropic managed)**、Microsoft Foundry）に適用されます。パートナーが運用するプラットフォーム、**Amazon Bedrock と Claude Models on Google Cloud (Google managed)** は独自の引退スケジュールを設定します」
+> **Windows: PowerShell の権限チェックが、現在のディレクトリを対象とし、かつ追加の引数を持つ `Set-Location` や `cd` のコマンドの一部を自動承認していた**のを修正。**これらは今後、承認を求めます**
 
-つまり **新しい方（Anthropic managed）は Anthropic の日付に従い、従来の Vertex AI 版（Google managed）は Google の日付に従う**、という線引きです。
+### 2. `sed -i` の扱いが変わり、`/rewind` で戻せなくなりました
 
-**この新しい方の制約**も明記されています。
+> **`sed -i` を、ファイル編集のプレビューを模したものではなく、標準の Bash の確認を受けて書かれたとおりに実行する**よう変更。**他の Bash による編集と同じく、`/rewind` では復元されません**
 
-- **APIキーが使えません。** 認証は Google Cloud の資格情報だけです
-- **Anthropic の組織が新しく1つ作られます。** 既に会社で Anthropic の組織（Claude Enterprise も含む）を持っていても、**それとは別の組織**になります
-- **Claude Console にメールアドレスでサインインできません。** Google Cloud コンソールの Claude ページから開く形で、**`roles/claude.admin` を持つ人だけ**が開けます
-- **MCP tunnels が使えません**（MCP tunnel = 手元のネットワークの中にある MCP サーバーに外から届かせる仕組み）
-- **割引は過去の利用分には適用できません。** 既に割引を持っている場合は、設定を始める前に担当者に連絡するよう案内されています
-- **ZDR（会話データを一切保持しない取り扱い）は申請すれば使えます**が、**他の Anthropic 組織で結んだ ZDR の取り決めは、この新しい組織には引き継がれません**
+`sed -i` = ファイルの中身をその場で書き換えるコマンド。`/rewind` = 直前の変更を巻き戻すコマンドです。
 
-**原さんへの関係**: 原さんは claude.ai とアプリから Claude を使っていて、Google Cloud のプロジェクトを通していません。**直接の影響はありません。**
+**これまでは `sed -i` が「ファイル編集」として扱われ、`/rewind` で戻せました。今日から戻せません。**
 
-### 2. Fast mode の「使えない場所」の記述が消えました
+### 3. `claude ultrareview` が、作業場所の信頼を求めるようになりました
 
-価格表の Fast mode の文が書き換わりました。**消えた部分があるので、そのまま並べます。**
+> **`claude ultrareview` がワークスペースの信頼を要求する**よう変更。**端末では確認を求め、それ以外では拒否します。** スクリプトは `--trust-workspace` を渡します（**値は取りません。** プルリクエストの番号やベースブランチはその前に置いてください）。または `CLAUDE_CODE_DISABLE_ULTRAREVIEW_TRUST_CHECK=1` を設定します
 
-- **旧**: 「Fast mode は Claude API（直接）で、そして Claude Opus 5.5 については Azure 上にホストされた Claude in Microsoft Foundry のデプロイで利用可能です。**Claude Platform on AWS やパートナー運用のクラウドプラットフォームでは利用できません。**」
-- **新**: 「Fast mode は Claude API（直接）で、そして Claude Opus 5.5 については **Claude Models on Google Cloud (Anthropic managed)** と Azure 上にホストされた Claude in Microsoft Foundry のデプロイで利用可能です。」
+**自動で回していたスクリプトは、何もしないと止まります。**
 
-**「AWS やパートナー運用のクラウドでは使えない」という一文が削除され、代わりの記述はありません。** 新しい文は、使えない場所については何も言っていません。**AWS で使えるようになったとは書かれていないので、ここは断定しません。**
+### 4. 権限確認を飛ばすモードでも、危険な `rm` は即座に拒否されるようになりました
 
-（Fast mode = Claude Opus の返答を速くする有料の設定。追加料金がかかります。）
+> **デスクトップアプリと VS Code の bypass permissions モードでの、危険な `rm` と `rmdir` の確認**を、**書き換えのヒントを添えて即座にコマンドを拒否する**よう変更。**無人のセッションが止まらないようにするためです**
 
-### 3. MCP のツールが二重に実行されていた不具合が直りました
+bypass permissions モード = 権限の確認を飛ばすモードです。**これまでは、そこでも危険な削除については確認が出て、無人だと止まっていました。今日から、確認ではなく即座の拒否になります。**
 
-2.1.307 の修正です。
+### 5. サンドボックスが有効なのに動かせない場合、書き込み前に確認を求めるようになりました
 
-> **HTTP の MCP ツール呼び出しが、呼び出しの途中で接続が閉じたときに2回送られていた**のを修正。**今後は読み取り専用か、何度実行しても結果が同じツールだけが再試行されます。**
+> **設定がサンドボックスから除外しているコマンド**を、**サンドボックスが有効だが実行できない間、その書き込み許可リストのパスへ書き込む前に確認を求める**よう変更。**サンドボックスなしでの代替実行は、そこでは拒否されます**
 
-MCP = Claude に外部のサービス（原さんの場合 Square・Gmail・Google Drive・Google カレンダー）をつなぐ仕組みです。
+### 6. worktree の作成・再利用で、git が必要に応じた取得をしなくなりました
 
-**「2回送られていた」というのは、たとえば予定を1件作るはずが2件できる、という種類の不具合です。** 今回から、**やり直しても害のないツールだけ**が再試行されるようになりました。
+> **worktree の作成と再利用を、ordinary clone でも、Bash のサンドボックスが設定された partial clone でも、git がオブジェクトを必要に応じて取得しない**よう変更。**そうした partial clone は、先にそれらを取得します**
 
-### 4. 画面読み上げの設定が、置き場所によって効かなくなりました（2.1.305 から）
+（worktree = 同じリポジトリの別のブランチを、別のフォルダとして同時に開く仕組み。partial clone = ファイルの中身を必要になるまで取ってこない、軽いクローン）
 
-> `axScreenReader` の設定と、設定の `env` ブロックの `CLAUDE_AX_SCREEN_READER` が、**ユーザー設定・管理設定・`--settings` で渡した設定からのみ適用される**ように変更（2.1.305 から）
+### 7. `/claude-api` スキルの作り方が変わりました
 
-**プロジェクトごとの設定ファイルに書いていた場合は効かなくなります。** 2.1.305 からの変更が、今回明記されました。
+> **`/claude-api` スキル**を、**`coordinator` ではなく `multiagent_20261001` の上で、動的なワークフローを既定で有効にして** Managed Agents のサブエージェントのチームを構築する**よう変更
 
-### 5. 自前サーバーで Claude Code を動かしている場合、準備処理に30分の上限がつきました
+### 8. Google Cloud の名称変更が、モデル一覧表と価格表に波及しました
 
-> **自前ランナー**: チェックアウトフックを**既定で30分後に停止**するよう変更。セッションの準備が失敗します。もっと長くかかる場合は `--checkout-hook-timeout-min` を上げるか `0` に設定してください
+**昨日できた2分割**（Anthropic managed / Google managed）に合わせて、表記が置き換わりました。
 
-（チェックアウトフック = セッション開始時にリポジトリを取ってきて準備をする処理）
+**モデル一覧表（`models-overview.md`）には、行が1つ追加されました。**
 
-（継続中のものを再掲します。**単独版の Claude Design が 2026年12月14日に閉鎖**されます。**Claude Sonnet 4.5 が 2026年11月30日に API から停止**します。**昨日出た API バージョン `2026-10-21` では `temperature` 等が全モデルで使えなくなります。** 原さんの使用モデルは Claude Opus 5 で、claude.ai 経由なので、いずれも直接の影響はありません。）
+- **「Google Cloud ID」の行が「Claude Models on Google Cloud (Google managed) ID」に改名**
+- **「Claude Models on Google Cloud (Anthropic managed) ID」の行が新しく追加**されました。**モデル ID は Claude API と同じ**（`claude-fable-5-1` / `claude-opus-5-5` / `claude-sonnet-5-5` / `claude-haiku-5-5`）
+- 表の下の注記も変更: 「引退: Anthropic が運用するプラットフォームについての Anthropic の約束。**Amazon Bedrock と Google Cloud** は独自の日付を設定します」→「…**パートナーが運用するプラットフォーム**は独自の日付を設定します」
+
+**価格表（`pricing.md`）では、「引退済み、ただし Google Cloud を除く」という注記が、すべて「Claude Models on Google Cloud (Google managed)」に置き換わりました**（Claude Opus 4.1 / Opus 4 / Sonnet 4 / Haiku 3.5。3つの表に合計12か所）。
+
+**価格の数字は1つも動いていません。** 念のため全モデルの金額を比べました。入力・5分キャッシュ書き込み・1時間キャッシュ書き込み・キャッシュ読み出し・出力、バッチ価格、ツール使用のシステムプロンプトのトークン数、すべて同一です。
+
+（継続中のものを再掲します。**単独版の Claude Design が 2026年12月14日に閉鎖**されます。**Claude Sonnet 4.5 が 2026年11月30日に API から停止**します。**API バージョン `2026-10-21` では `temperature` 等が全モデルで使えなくなります。** 原さんの使用モデルは Claude Opus 5 で、claude.ai 経由なので、いずれも直接の影響はありません。）
 
 ---
 
 ## ③ 今日の変更（説明つき）
 
-### Claude Code が、新しい API バージョンへの書き換えを手伝ってくれるようになりました
+### Slack の @Claude の設定を、API で読み書きできるようになりました
 
-**`/claude-api api-version` というコマンドが追加されました。**
+**Claude Tag API** が beta で公開されました。リリースノートの説明をそのまま訳します。
 
-> Claude API のコードを API バージョン `2026-10-21` に移行する `/claude-api api-version` を追加
+> **Claude Tag API** は、`experimental-claude-tag-2026-10-21` のベータヘッダを付けることで、**Claude Enterprise の組織**で beta として利用できます。その `/v1/organizations/claude_tag/` のエンドポイントは、**Slack のチャンネルとワークスペースの Claude Tag の設定を読み書きし、あるチャンネルでどの設定が適用されているかと、それぞれがどこから来ているかを示し、Access bundle を取り付けます。** 呼び出しには、**primary owner が claude.ai で `read:claude_tag` または `write:claude_tag` のスコープで作成した Admin API キー**を使います。**Claude Platform（Claude Console）の組織では利用できません。**
 
-**昨日報告した破壊的変更**（`temperature` が使えなくなる、`workspace_id` が `scope` になる、など）に**自分のコードを合わせる作業を、Claude Code にやらせられる**ようになったということです。
+Claude Tag = Slack のチャンネルに @Claude を置いて、そこで仕事を頼める仕組みです。
 
-### Claude が「止められた操作」を記録に残せるようになりました
+**「どの設定がどこから来ているか」が分かる**のがこの API の特徴として書かれています。ワークスペース全体の設定とチャンネルごとの設定が重なるので、**実際に効いているのがどちらなのかを確かめられる**ということです。
 
-> **権限ルール・auto モード・安全性チェック・フック・サンドボックスが止めた、確認を求めた、または差し戻した**ツール呼び出しごとに、`claude_code.safety_event` という OpenTelemetry のイベントを追加
+**なお、これは Claude Enterprise 向けで、Claude Console（API を直接使う組織）では使えません。**
 
-OpenTelemetry = 動作の記録を外部の監視サービスに送るための共通の仕組みです。
+### Slack で、承認したチャンネル以外に投稿されていた不具合が直りました
 
-**これまでは「何が止められたか」が記録として外に出ていませんでした。** 今回から、**止められた1件ごとにイベントが残る**ようになりました。組織で Claude Code を使っていて「どんな操作が止まっているのか」を把握したい場合に使うものです。
+2.1.309 の Claude Tag の修正です。
 
-### 消したはずの会話が戻ってくる不具合が直りました
+> **Slack の Claude が、あなたがチャンネル向けに承認した下書きを、間違って自分の DM に投稿していた**のを修正。**チャンネルの指定がない投稿は拒否されるようになり、承認されたチャンネルに行けるようになりました**
 
-クラウドセッション（原さんのこのダイジェストもクラウドセッションです）の修正が2件あります。
+**「このチャンネルに投稿していいですか」と確認して承認したのに、別の場所（自分への DM）に出ていた**という不具合でした。**今回から、行き先が指定されていない投稿は、そもそも拒否されます。**
 
-> - **`/clear` でクリアした会話が、クラウドまたは自前ランナーのセッションが再起動したときに戻ってくることがあった**のを修正
-> - **クラウドセッションの `/autocompact` が、セッション再起動後に既定の幅に戻っていた**のを修正
+Claude Tag の修正は他に4件あります。
 
-`/clear` は会話をまっさらにするコマンド、`/autocompact` は会話が長くなったときに自動で要約する設定です。**どちらも「再起動すると設定前の状態に戻ってしまう」という同じ形の不具合**でした。
+> - **Slack の Claude の承認カードの Allow と Deny が、セッションが停止していたときに何も起こさなかった**のを修正。**あなたの回答がセッションを再開するようになりました**
+> - **ワークスペースが別の Claude 組織に移った後、Slack のチャンネルでタグなしのメッセージを Claude が無視していた**のを修正（Enterprise Grid の共有されていないチャンネルも含む）
+> - **Slack のチャンネルで、誰かがスレッドに追加した新しいメッセージを読む前に、Claude がスレッドの返信を投稿していた**のを修正
+> - **Claude Tag の管理設定の Slack のページが、一覧の読み込みに失敗したときに「ワークスペースが接続されていません」と表示していた**のを修正。**Retry ボタン付きのエラーが表示されるようになりました**
 
-### Claude Code が、おかしなツール呼び出しで諦めずにやり直すようになりました
+### Claude が、GitHub で無関係な人を呼び出さなくなりました
 
-> **解釈できないツール呼び出しからの復帰を改善**: Claude Code は**ターンをエラーで終える前に、最大2回まで呼び出しをやり直す**ようになりました
+> **Claude が、プルリクエスト・issue・コメントで役割名やプレースホルダをメンションとして書き、無関係な GitHub ユーザーに通知していた**のを修正
 
-これまでは、Claude が壊れた形でツールを呼んでしまうと**そこで作業が終わっていました。** 今回から2回までやり直します。
+**「@reviewer を確認してください」のような書き方をしたときに、たまたまその名前のアカウントを持っていた人に通知が飛んでいた**という不具合です。
 
-### 手分けして働く Claude が、お互いの仕事を取り合わなくなりました
+### ディスクがいっぱいのときに、何を消せばいいか教えてくれるようになりました
 
-> **一緒に起動された fork サブエージェントを改善**: **それぞれに「どの起動が自分のものか」が伝えられる**ようになり、fork がお互いの仕事を始めようとすることがずっと少なくなりました
+> **ディスク満杯の扱いを改善**: **ディスクが満杯で途中で切れた Bash コマンドは、そう言って、空けるべきフォルダの名前を示すようになりました。** また、**満杯の一時ボリュームで起動すると、生の `ENOSPC` エラーではなく、明確なメッセージが表示されます**
 
-Claude は大きな仕事をするとき、自分の会話をそのまま引き継いだ作業係（fork サブエージェント）を複数呼び出すことがあります。**同時に呼ばれると、どちらも「自分が担当だ」と思って同じ仕事を始めてしまう**ことがありました。今回それが直りました。
+`ENOSPC` = 「空き容量がありません」というシステムのエラーコードです。**これまでは、この生の文字列が出るだけでした。**
+
+### 大きな CLAUDE.md で、会話が何度も要約されてしまう不具合が直りました
+
+> **非常に大きな入れ子の CLAUDE.md の下にあるファイルを読んだ後、セッションが繰り返し圧縮されていた**のを修正。**サイズの上限を超えた入れ子の CLAUDE.md は、今後その冒頭だけを読み込みます**
+
+CLAUDE.md = プロジェクトのフォルダに置いて、Claude に前提を伝えるファイルです。「入れ子」はサブフォルダにも置かれている場合を指します。
+
+**大きすぎる CLAUDE.md が会話の容量を食いつぶし、Claude が何度も要約を繰り返す（= 作業が進まない）状態**になっていました。今回から、大きすぎるものは冒頭だけ読まれます。
 
 ---
 
 ## ④ 一行で流すもの
 
-**Claude Code 2.1.308（1項目）**
-
-- バグ修正と信頼性の改善（内容の明細はありません）
-
-**Claude Code 2.1.307 のうち、③と②で触れていない残り（30項目）**
-
-追加（③に記載の2件以外はありません）
+**Claude Code 2.1.309 のうち、②③で触れていない残り（52項目）**
 
 修正
 
-- `CLAUDE_CODE_DISABLE_1M_CONTEXT` を設定し、かつモデルが `opus[1m]` のような `[1m]` 付きの別名のとき、**モデルが見つからないエラーでリクエストが失敗していた**のを修正
-- **`prompt-caching-scope` のベータヘッダが、独自の `ANTHROPIC_BASE_URL` を通した接続と Foundry に送られていた**のを修正（そこでは効果がありません）
-- **macOS でログインキーチェーンがロックされている間、`claude -p` で MCP サーバーが「認証が必要」と表示されていた**のを修正。**理由が表示されるようになり、ロック解除後の次回起動は再サインイン無しでつながります**
-- **macOS や Linux の端末が、MCP サーバーの接続中にスリープしたときに、サーバーがタイムアウトと報告され、ヘッドレス実行では失敗したままになっていた**のを修正
-- **バックグラウンドのタスクが動いているときに、SDK MCP サーバーの最新のツールなしでターンが始まることがあった**のを修正
-- **PDF のページ・画像・その他の大きなツール結果を多く読むターンで出ていた「Autocompact is thrashing」エラー**の一部を修正
-- **Claude アプリのゲートウェイ経由のセッションで `CLAUDE_STREAM_FIRST_BYTE_TIMEOUT_MS` が無視されていた**のを修正
-- **Claude Desktop のセッションから、Claude アプリのゲートウェイ経由で送られるテレメトリが、`OTEL_EXPORTER_OTLP_HEADERS` が設定されていると拒否されていた**のを修正
-- **`/permissions` の「Recently denied」に、拒否されたシェルコマンドが表示されていなかった**のを修正。また **auto モードのローカル分類器が、再試行されたコマンドを確認するときに、そこからの承認を無視していた**のも修正。**行を承認すると、説明ではなくコマンド自体が表示されます**
-- **`/help` と `/` のコマンドメニューが、`/claude-api` のような同梱スキルについて、短い説明ではなくモデル向けの長い説明を表示していた**のを修正
-- **サブエージェントの記録が、ストリーミングされた応答についてプレースホルダのトークン使用量と空の停止理由を記録していた**のを修正
-- **Agent SDK の `setModel()` 経由のモデル切り替えと、それを使って作られたアプリで、API がモデルの確認に5秒以上かかると拒否されていた**のを修正。**Claude Code は最大15秒待つようになりました**
-- **接続したアプリ（デスクトップアプリがアイドルのセッションを格納するなど）から停止されたバックグラウンドコマンドが、Claude には「ユーザーが停止した」と報告されていた**のを修正。**通知はその出力ファイルの名前を示すようになりました**
-- **Cowork のクラウドセッションで、サイトが 4xx のステータスや robots.txt の拒否で応答したときに、WebFetch がツールのエラーを報告していた**のを修正。**ローカルのセッションと同じく、通常の結果になりました**
-- **直接設定した GitHub MCP サーバーの書き込みツールが、デスクトップアプリの Code タブで、何も作らずに閉じるフォームを表示していた**のを修正
-- **Artifact ツールの読み取りが、サーバーが再利用中の接続を閉じていたときに、接続リセットで失敗していた**のを修正
-- **自前ランナー**: **`--use-anthropic-git-proxy` を使うセッションが、前のセッションがクローンに残した `.claude/settings.local.json` をコミットしていた**のを修正
-- **自前ランナー**: **チェックアウトフックの実行中にセッションを格納・再投入したり、ランナーを停止したりすると、フックのプロセスが動いたままになり、ランナーの枠が押さえられたままになっていた**のを修正
+- **ctrl+enter（今すぐ送信）が、返答が始まる前に押したときはメッセージを待ち行列に入れるだけだった**のを修正。また、**フックの実行中に押すと、プロンプトのフックを再実行しつつメッセージを待ち行列に残していた**のも修正
+- **キーに割り当てたスラッシュコマンドが、`!` モードからシェルの中で実行されていた**のを修正
+- **ctrl+o が、他のエージェントやセッションからの、まだ配達待ちのメッセージを表示していなかった**のを修正。**記録の下に、待機中と印を付けて全文が表示されるようになりました**
+- **長いツール出力のプレビューが絵文字の途中で切られ、`jq` で解析できないセッションの記録が残っていた**のを修正
+- **親の `/proc` を共有する Linux のサンドボックスで、PDF のページ範囲について Read が「File does not exist」と報告していた**のを修正
+- **Claude Desktop がホストするセッションからのメッセージが、接続の更新時に失われることがあった**のを修正
+- **同じ端末のターミナルが別のアカウントまたは組織にサインインしているとき、Claude デスクトップアプリの Claude Code のセッションから機能が欠けていた**のを修正
+- **`claude remote-control` のステータス行が、git リポジトリではないフォルダについてブランチを `HEAD` と表示していた**のを修正
+- **分割ペインのエージェントの同僚が、リーダーのコマンドラインで指定されたツールの拒否ルールと `--tools` のルールを継承していなかった**のを修正
+- **`/rename` で改名したセッションが、VS Code のウィンドウの再読み込みや非対話の `--resume` の後、他のセッションから生成された名前で見えていた**のを修正
+- **`/rewind` の一覧が、`/code-review --fix`・サブエージェント・シェルのコマンドを通してチェックポイント対象のファイルを変更したターンについて「No code changes」と表示していた**のを修正
+- **`/privacy-settings` が古い「Help improve our AI models」の値を表示していた**のを修正。**設定を取得できないときも、そう言うようになりました**
+- **組織がフィードバックを受け付けていないときに、フィードバックが「try again later」と言っていた**のを修正。**サーバーの理由と、バグの報告先が表示されるようになりました**
+- **大きすぎる /feedback の報告が、記録を外して再送信されるのではなく失敗していた**のを修正
+- **`--add-dir` のフォルダにあるスキルが、別のスキルが既にその名前を持っていると届かなくなっていた**のを修正。**今後は `<フォルダ>:<名前>` として提供されます**
+- **`/verify` と `/code-review` が、入れ子のパッケージ自身のスキルを、そのファイルがシェルから変更されたときに見つけられなかった**のを修正
+- **/claude-api スキルが、`ant beta:worker poll --on-work` がコマンドにトレースのコンテキストを渡すと述べていた**のを修正
+- **/claude-api スキルの C# のトレース設定で、クラウドプラットフォームのクライアントからのスパンが欠けていた**のを修正
+- **/claude-api スキルが、Claude Platform on AWS へのリクエストの API のスパンは呼び出し元のトレースに参加できないと述べていた**のを修正
+- **PowerShell で実行されるフックが、フックのプログラムが終了コード 2 で終了しても止めていなかった**のを修正。また **Windows で `"shell": "powershell"` の `PreToolUse` と `PermissionRequest` のフックが、Git for Windows が入っていないと失敗しても通してしまっていた**のも修正
+- **`haiku` のような別名でモデルを指定する mod の `turn.step` フックが、モデルのエラーで全てのリクエストを失敗させていた**のを修正。**別名がそのモデルに解決されるようになりました**
+- **claude.ai から同期されたプラグインとスキルが、ディスクの読み取りエラーの後、セッションの途中でも削除されることがあった**のを修正
+- **一部の普通のページ（特定の縮小されたスクリプトを含むページや、Claude が先に読めなかった artifact）について、artifact の公開と更新が拒否されていた**のを修正
+- **ターンの途中で会話が圧縮された後、そのターンの残りで Claude が artifact の更新ごとに権限を求めていた**のを修正
+- **`ANTHROPIC_BEDROCK_BASE_URL` が既定の `bedrock-runtime.<region>.amazonaws.com` のエンドポイントに設定されているとき、Amazon Bedrock できめ細かいツールのストリーミングがオフのままになっていた**のを修正
+- **キープアライブの ping だけを送るゲートウェイの背後で「Waiting for API response」のヒントがちらついていた**のを修正。**Anthropic のバックエンド以外の経路は45秒待つようになりました**
+- **macOS: Xcode もコマンドラインツールも入っていない Mac で、Claude Code の起動ごとに「Install Command Line Developer Tools」のダイアログが開いていた**のを修正
+- **自前ランナー: `--startup-timeout-min` が、`/code-review` のような最初のプロンプトがまだサブエージェントで作業中のセッションを停止していた**のを修正。**凍ったプロセスは引き続き停止されます**
 
 改善
 
-- **ブラウザのサインインを改善**: **アカウントのプロフィールの読み込みを待たずに、サインイン完了と同時に成功ページが表示される**ようになりました
-- **クラウドと自前ランナーのセッションでの Web 検索のエラーを改善**: **403 で拒否され、かつ理由が示された検索は、一般的な「Authentication error」ではなくその理由を表示する**ようになりました
-- **デスクトップアプリの MCP サーバーの1つが接続できないときの、クラウドセッションの最初の返答までの時間を改善**
-- **大きな貼り付け画像や PDF の読み取りを含む記録を持つセッションの、Remote Control の接続時間を改善**
+- **Windows で Claude Code が自分のために実行する多くの git コマンドの速度を改善。** また**全てのプラットフォームで、それらのコマンドのエラーが、git が別の言語に設定されていても英語で表示される**ようになりました
+- **フックのモジュールが深すぎて読み込めないときのエラーを改善**: **素のスタックオーバーフローのメッセージではなく、ファイル名を示す**ようになりました
+- **/claude-api スキルを改善**: **OpenTelemetry の追加を頼まれたときに、SDK のトレースと並べて API のトレースも提案する**ようになりました
+- **/claude-api スキルを改善**: **機能が未対応と言う前に、公開中のドキュメントを確認する**ようになりました
+- **自前ランナー: 新しいランナーに移るセッションを改善**: **Claude は、中断されたツール呼び出しを、結果不明と印を付けて見られる**ようになりました
 
-変更
+更新
 
-- **WebSearch の予算を使い切ったときに Claude が受け取る通知**を、**ブラウザや computer use で検索エンジンに問い合わせないようにも伝える**よう変更
-- **自前ランナー**: **Anthropic 管理の git 用に作られる証明書ファイルを、CLI と同じように信頼する証明書を絞り込む**よう変更。**`[runner:warn]` の行が除外された数を示します**
+- **同梱の dataviz スキルを更新**: **APCA を文字のコントラストの尺度として受け付ける**ように（**AA 準拠が必要な場所では WCAG 2 の比率を維持**）。**パレットの検証スクリプトに `apca(text, background)` 関数を追加**し、**色の付いた図形の中の文字を白にすべきか、ほぼ黒にすべきかを示す**ように
+- **/claude-api スキルを更新**: **サービスアカウントのキーと Workload Identity Federation のトークンで、OpenTelemetry の送信先を管理できる**ようになりました
 
-VSCode（7項目）
+VSCode（10項目）
 
-- **音声入力が自分で止まったとき（15秒間、認識できる発話がない／2分の上限）に、マイクボタンに通知を追加。** 理由と、**それまでのテキストは保持されること**を伝えます
-- **「Show more」で展開した長いプロンプトがチャットパネル全体を覆っていた**のを修正。**固定されたプロンプトはパネルの40%が上限になり、スクロールします**
-- **LaTeX の数式を含むリスト項目や表のセルの一部が、リッチテキストエディタに新しいリストや表として貼り付けられていた**のを修正
-- **`NODE_EXTRA_CA_CERTS` が `~/.claude/settings.json` にだけ設定されているとき、TLS を検査するプロキシの背後で音声入力が失敗していた**のを修正。**`CLAUDE_CODE_CERT_STORE` にも従うようになりました**
-- **「still open somewhere else」の通知**が、**拡張機能の再起動で残った Claude のプロセスも対象にする**よう変更（通常は10分ほどで自然に終わります）
-- **音声入力が、CLI と同じように信頼する証明書を絞り込む**よう変更
-- **拡張機能自身のリクエストが、CLI と同じように信頼する証明書を絞り込み、環境またはユーザー設定で指定された `NODE_EXTRA_CA_CERTS` のファイルを信頼する**よう変更
+- **音声入力や拡張機能自身のリクエストが証明書の検証に失敗したとき（TLS を検査するプロキシの背後など）に、どうすればよいかを示すログの警告を追加**
+- **エディタが不完全なファイルのコピーをキャッシュした後、Claude のパネルが空のままになっていた**のを修正。**自分で復帰するか、何が起きたかと直し方を表示するようになりました**
+- **メッセージを送らずに新しいセッションを始めるたびに、セッション履歴が空の「Untitled」のセッションで埋まっていた**のを修正
+- **`/goal` のような長いスラッシュコマンドのメッセージがチャットパネルを埋めていた**のを修正。**他のプロンプトと同じく Show more の後ろに折り畳まれる**ようになりました（anthropics/claude-code#97469）
+- **チャットパネルを狭くした後、長いメッセージが Show more の後ろに折り畳まれていなかった**のを修正
+- **チャット入力の Ctrl+J が常に改行を挿入していた**のを修正。**`~/.claude/keybindings.json` の Chat コンテキストで "ctrl+j" が null に設定されているとき、VS Code と OS に任される**ようになりました
+- **mod の「From the … plugin」のラベルが、プロンプトの上で、スラッシュコマンドと @ メンションのメニューの上に描かれていた**のを修正（anthropics/claude-code#102981）
+- **コピーした LaTeX の数式を貼り付けたときの、空のリスト項目・段落・コードブロックと、1から振り直されるリスト項目**を修正
+- **組織がフィードバックを受け付けていないときに、フィードバックのエラーが HTTP のステータスだけを表示していた**のを修正
+- **チャットパネルの Edit と Write の速度を改善**: **編集ごとの新しい問題の待ち時間が、多くの場合 1〜1.5秒から 0.75秒に短縮**
 
-クラウドセッション（2項目。③に記載の2件とは別です）
+クラウドセッション（5項目）
 
-- **リポジトリの選択画面が、検索中なのに「No repositories match」と表示していた**のを修正。**結果が届くまで「Searching…」が表示されます**
-- **自前環境での「Waiting for a runner」の表示が途中で切れていた**のを修正。**オンデマンドのランナーでは、最後のメッセージからの経過時間を数え上げ、失敗した試行回数も表示します**
+- **ルーチンのフォームの「Add connector」の一覧が、まだ読み込み中なのにコネクタがないと言っていた**のを修正
+- **クラウド環境のエディタが、環境変数を並べ替え、2種類の引用符を両方含む値にバックスラッシュを追加していた**のを修正
+- **管理設定の自前環境の詳細ダイアログを、タイトル・タブ・ボタンが見えたままで、中身だけがスクロールする**ように修正
+- **クラウドセッションの「read documentation」のツールの行が、読める形のページではなくエスケープされた JSON を表示していた**のを修正
+- **クラウドセッションの Changes ペインを改善**: **push 済みのコミットだけを並べているのか、Claude の編集だけを並べているのかを言う**ようになりました
 
-Code Review（1項目）
+Code Review（2項目）
 
-- **`@claude review stop`（`off` と `pause` も可）を追加。** プルリクエストの `@claude review always` の購読を、**新しいレビューを始めずに終わらせます**
+- **レビューの完了後、プルリクエストにチェックが表示されなかった**のを修正（それ以前の作成の試行が失敗していた場合）。**最後の試行が完了したチェックを追加するようになりました**
+- **`@claude review stop` の後も、実行中のレビューの後ろに並んでいた push がレビューを始めていた**のを修正。**そのチェックは閉じられ、理由が示されます**
 
-**Platform リリースノート（10月22日付、2項目）**
+**Platform リリースノート（新規1項目）**
 
-- **Claude Models on Google Cloud (Anthropic managed) を公開**（②③に記載）
-- **Fast mode が、Claude Models on Google Cloud (Anthropic managed) の Claude Opus 5.5 で利用可能に**
+- **Claude Tag API の beta 公開**（③に記載）
 
-**価格表（`pricing.md`）の変更**
+**Platform リリースノートの既存項目の整理（26項目）**
 
-**数字は1つも動いていません。** 変わったのは名称・リンク・表記です。
+**内容は変わっていません。** 書き方とリンク先の整理です。
 
-- **「Google Cloud」という表記が「Claude Models on Google Cloud (Google managed)」に置き換え**（4か所）。リンク先も新しいページに
-- **パートナー運用プラットフォームの説明に、新しい Anthropic managed 版への案内を追加**
-- **地域別価格（1.1倍）の適用範囲に「Claude Models on Google Cloud (Anthropic managed)」を追加**
-- **CCU（Claude Consumption Unit = AWS / Azure 経由の支払い単位）の表で、`$0.01 per CCU` → `$0.01 USD per CCU`** に。**価格は変わっていません**
-- **Managed Agents のセッション実行料金 `$0.08 per session-hour` → `$0.08 USD per session-hour`。価格は変わっていません**
-- **計算例の金額に「USD」を追記**（$0.20 USD、$0.30 USD、$0.08 USD、合計 $0.58 USD／$0.04 USD、$0.008 USD、$0.30 USD、$0.08 USD、合計 $0.428 USD）。**どの数字も変わっていません**
-- **コードブロックの表示が `json` から `text wrap` に**（3か所）
-- **「search iterations executed」→「search iterations run」**
-- **請求に関する箇条書き7件に句点を追加**し、「**Credit card and invoicing options available**」→「options **are** available」、「**Usage tracking available**」→「tracking **is** available」
+- **「public beta」→「beta」に統一**（12か所。Managed Agents、advisor ツール、構造化出力、tool search ツール、effort パラメータ、プログラム的ツール呼び出し、コード実行ツール v2、cache diagnostics、multiagent orchestration、Files API、MCP connector、interleaved thinking、fine-grained tool streaming）
+- **「Google Cloud」「Vertex AI」へのリンクが新しい `google-managed` のページに置き換え**（8か所）
+- **金額に「USD」を追記**（Claude Sonnet 5 の $2 / $10、Claude Opus 5.5 の説明にある Claude Opus 5 の $5 / $25、Claude Fable 5.1 のキャッシュ読み出し $0.25、Claude Opus 4.7 の $5 / $25）。**数字は変わっていません**
+- **リンクの文言を、リンク先の見出しの名前に合わせる修正**（「Subscribe to webhooks」→「Supported event types」2か所、「Fast mode」→「Fast mode model availability」4か所、「Prompt caching」→「Automatic caching」「1-hour cache duration」、「Authentication」→「API keys in Authentication」「Key expiration in Authentication」、「Errors」→「Error shapes」、「migration guide」→「Claude Sonnet 5.5 migration guide」「Claude Opus 5.5 migration guide」、「Web fetch tool」→「How to use web fetch」、「blog post」→「Workspaces blog post」、「Rate Limits」→「Rate Limits tab」、「IAM actions」→「Compliance IAM actions」、「the legacy integration」のリンク範囲）
+- **言い回しの修正**: 「We've launched [Claude Opus 4.5](...)」→「We've [launched Claude Opus 4.5](...)」のようにリンクの範囲を変える形（6か所）、「per request」→「for each request」「for each call」、「Structured outputs now **supports**」→「**support**」、「We've **included**」→「We've **added**」、「a high-quality prompts」→「high-quality prompts」、「global vs regional」→「global **versus** regional」、「September 1, 2026 will not occur」→「September 1, 2026**,** will not occur」
+- **箇条書きの記号が `-` から `*` に統一**（Fast mode の Google Cloud の項目、API キーの項目）
+- **注記**: **「October 20, 2026」の見出しが2つ並んでいます。** 今日追加された Claude Tag API の項目が、既存の10月20日の項目（user profiles など）とは別の見出しの下に置かれました。**内容の重複ではなく、見出しが分かれているだけです**
+
+**Platform ドキュメント目次（新規ページ 13件）**
+
+英語のページ数が **808 → 821** に増えました。
+
+- **Google Cloud 関連3件**: `claude-models-on-google-cloud/overview`（2つを比べるページ）、`/anthropic-managed`、`/google-managed`。**従来の `claude-on-vertex-ai` は目次から消えました**
+- **CMEK 関連9件**（CMEK = 自社で管理する暗号鍵で Claude のデータを暗号化する仕組み）。**1ページだったものが分割されました**: `cmek-how-it-works`（仕組み）、`cmek-admin-api`（Admin API で鍵を追加・取り付ける）、`cmek-data-retention`（CMEK とデータ保持と ZDR）、`cmek-aws-kms-workspaces`（AWS KMS の鍵を特定のワークスペースに限る）、`cmek-troubleshooting`（問題の解決）、`cmek-coverage-claude-enterprise`（Claude Enterprise で何が対象か）、`cmek-coverage-claude-platform`（Claude Platform で何が対象か）、`cmek-key-lifecycle`（鍵を回転・無効化・削除したときに何が起きるか）。既存3件（AWS KMS / Azure Key Vault / Google Cloud KMS）は説明文が「Configure ... for CMEK」→「Set up CMEK with ...」に
+- **`claude-tag-api`**（③に記載）
+- **`claude-models-on-google-cloud-anthropic-managed-iam-permissions`**（新しい Google Cloud 版の IAM 権限の一覧）
+- **`migration-2026-10-21`**（**昨日の API バージョンの移行ガイドが、今日ようやく目次に載りました。** 本文は昨日の時点で取得できていました）
+
+**価格表（`pricing.md`）**
+
+- **「引退済み、ただし Google Cloud を除く」の注記が「Claude Models on Google Cloud (Google managed)」に置き換え**（3つの表に12か所）
+- **「Bedrock」「Google Cloud」のリンクの文言に「pricing」を追記**
+- **「global vs regional」→「global versus regional」**、「the legacy integration」のリンク範囲の変更
+- **コードブロックの表記が `text wrap` から `json` に戻りました**（3か所）。**昨日「`json` → `text wrap` に変わった」と報告した箇所です。1日で元に戻りました**
+- **数字は1つも動いていません**（②に記載）
+
+**モデル概要（`models-overview.md`）**
+
+- **Anthropic managed 版のモデル ID の行が追加**、Google Cloud の行が改名、注記2件の書き換え（②に記載）
 
 **モデル廃止一覧（`model-deprecations.md`）**
 
-- **Google Cloud が「Anthropic managed」と「Google managed」に分けて書き直されました**（②に記載）。**モデルの状態と日付は何も動いていません**
+- **変更なし**（昨日の Google Cloud 2分割の反映で既に更新済みです）
 
-**モデル概要（`models-overview.md`、1項目）**
+**ドキュメント目次（Claude Code）**
 
-- 「adjust your prompts to guide the model toward **the desired output length**」→「toward **the output length you want**」
-
-**ドキュメント索引**
-
-- **Claude Code の索引**: 変更なし
-- **Platform の索引**: **新しいページは増えていません。** 既存2件の表示名が整理されただけです
-  - 「Tool Runner (SDK)」→「Tool **runner** (SDK)」
-  - 「Manage WIF via API」→「Manage WIF **with the Admin API**」
-  - **注記**: 今日のリリースノートが案内している新しい Google Cloud のページ（`claude-models-on-google-cloud/anthropic-managed` など）は、**索引にはまだ載っていません。** 索引の67行目は従来の `claude-on-vertex-ai` のままです。**ページ自体は取得できたので（②③の引用はそこからです）、索引の更新が遅れているだけと思われます**
+- **変更なし**
 
 ---
 
@@ -229,55 +272,40 @@ Code Review（1項目）
 
 | 項目 | 今日 | 前日 |
 |---|---|---|
-| Claude Code（npm） | **2.1.308** | 2.1.307 |
-| CHANGELOG 最新 | **2.1.308** | 2.1.306 |
-| **npm と CHANGELOG** | **一致** | **食い違い** |
-| CHANGELOG の新規項目 | **44**（2.1.308 が1件、2.1.307 が43件。うち VSCode 7件） | 2 |
-| Platform リリースノートの新規項目 | 2（10月22日付） | 9 |
-| 変更のあったソース | 7 / 8 | 7 / 8 |
+| Claude Code（npm） | **2.1.309** | 2.1.308 |
+| CHANGELOG 最新 | **2.1.309** | 2.1.308 |
+| npm と CHANGELOG | **一致** | 一致 |
+| CHANGELOG の新規項目 | **79**（VSCode 10件、Claude Tag 5件、クラウドセッション 5件、Code Review 2件） | 44 |
+| うち「止めるはずの操作が通っていた」修正 | **11**（+ Windows 1件） | 0 |
+| Platform リリースノートの新規項目 | **1**（Claude Tag API） | 2 |
+| Platform ドキュメントの新規ページ | **13**（808 → 821） | 0 |
+| 変更のあったソース | 6 / 8 | 6 / 8 |
 | ソース取得 | **8 / 8 成功** | 8 / 8 成功 |
 
-**昨日の食い違いは解消しました。** 昨日「npm は 2.1.307 だが CHANGELOG は 2.1.306 まで」と書きました。**今日、2.1.307 の内容（43項目）が CHANGELOG に出ました。** 同時に 2.1.308 も出て、npm も 2.1.308 に揃っています。
+**取得サイズ**: changelog 1,081,887 / Claude Code 目次 63,682 / Platform リリースノート 133,503 / Platform 目次 90,924 / モデル概要 22,012 / モデル廃止一覧 14,616 / 価格表 53,397 バイト
 
-**新しいプラットフォーム**
+モデルの状態: **現行・廃止予告・停止済みの区分に変更はありません。** 価格も変わっていません。
 
-| 項目 | 内容 |
-|---|---|
-| 名前 | **Claude Models on Google Cloud (Anthropic managed)** |
-| 運用 | **Anthropic**（Claude API そのもの） |
-| アクセス | Google Cloud プロジェクト経由。IAM で制御 |
-| 請求 | **Google Cloud Marketplace**。Anthropic からの請求書は別に来ません |
-| 必要なサービス | `claude.googleapis.com` と `anthropic-managed-claude.cloudpartnerservices.goog` |
-| IAM の役割 | `roles/claude.viewer`（読み取りのみ）／`roles/claude.user`（メッセージ送信など）／`roles/claude.admin`（組織全体 + Claude Console を開ける） |
-| モデル ID | **Claude API と同じ**（例: `claude-opus-5-5`） |
-| 使えないもの | **APIキー / MCP tunnels / 自前サンドボックスでの memory store / 既製の自前サンドボックスワーカー** |
-| Fast mode | **Claude Opus 5.5 で利用可能** |
-| 監査ログ | Cloud Audit Logs。**Data Access ログは既定でオフ**、Admin Activity ログは常にオン |
+| モデル | 状態 | 停止日 | 入力 / 出力（1Mトークンあたり） |
+|---|---|---|---|
+| claude-fable-5-1 / claude-mythos-5-1 | 現行 | 2027-09-01 以降 | $10 / $50 |
+| claude-fable-5 / claude-mythos-5 | 現行 | 2027-06-09 以降 | $10 / $50 |
+| claude-mythos-preview | 廃止予告 | 未定 | — |
+| claude-opus-5-5 | 現行 | 2027-09-22 以降 | $4 / $20 |
+| **claude-opus-5**（原さんの使用モデル） | **現行** | 2027-07-24 以降 | **$5 / $25** |
+| claude-opus-4-8 | 現行 | 2027-05-28 以降 | $5 / $25 |
+| claude-opus-4-7 | 現行 | 2027-04-16 以降 | $5 / $25 |
+| claude-opus-4-6 | 現行 | 2027-02-05 以降 | $5 / $25 |
+| claude-opus-4-5-20251101 | 現行 | 2026-11-24 以降 | $5 / $25 |
+| claude-sonnet-5-5 | 現行 | 2027-09-28 以降 | $2 / $10 |
+| claude-sonnet-5 | 現行 | 2027-06-30 以降 | $2 / $10 |
+| claude-sonnet-4-6 | 現行 | 2027-02-17 以降 | $3 / $15 |
+| claude-sonnet-4-5-20250929 | 廃止予告 | **2026-11-30** | $3 / $15 |
+| claude-haiku-5-5 | 現行 | 2027-10-07 以降 | $0.10 / $0.50（10万トークン超は $0.50 / $2.50） |
+| claude-haiku-4-5-20251001 | 現行 | 2026-10-15 以降（過ぎました） | $1 / $5 |
+| claude-opus-4-1 / 4, claude-sonnet-4, claude-3-7-sonnet, claude-3-5-haiku, claude-3-haiku | 停止済み | — | — |
 
-モデルの状態: **現行・廃止予告・停止済みの区分に変更はありません。**
-
-| モデル | 状態 | 停止日 |
-|---|---|---|
-| claude-fable-5-1 / claude-mythos-5-1 | 現行 | 2027-09-01 以降 |
-| claude-fable-5 / claude-mythos-5 | 現行 | 2027-06-09 以降 |
-| claude-mythos-preview | 廃止予告 | 未定 |
-| claude-opus-5-5 | 現行 | 2027-09-22 以降 |
-| **claude-opus-5**（原さんの使用モデル） | **現行** | 2027-07-24 以降 |
-| claude-opus-4-8 | 現行 | 2027-05-28 以降 |
-| claude-opus-4-7 | 現行 | 2027-04-16 以降 |
-| claude-opus-4-6 | 現行 | 2027-02-05 以降 |
-| claude-opus-4-5-20251101 | 現行 | 2026-11-24 以降 |
-| claude-sonnet-5-5 | 現行 | 2027-09-28 以降 |
-| claude-sonnet-5 | 現行 | 2027-06-30 以降 |
-| claude-sonnet-4-6 | 現行 | 2027-02-17 以降 |
-| claude-sonnet-4-5-20250929 | 廃止予告 | **2026-11-30** |
-| claude-haiku-5-5 | 現行 | 2027-10-07 以降 |
-| claude-haiku-4-5-20251001 | 現行 | 2026-10-15 以降（過ぎました） |
-| claude-opus-4-1 / 4, claude-sonnet-4, claude-3-7-sonnet, claude-3-5-haiku, claude-3-haiku | 停止済み | — |
-
-**Claude Haiku 4.5 について**: 期限（10月15日）を過ぎて8日目です。**廃止予告は今日時点でも出ていません。**
-
-価格表（`pricing.md`）: **数字は1つも動いていません。** 名称の置き換えと「USD」の追記、言い換えだけです（④に全件記載）。**ただし Fast mode の提供範囲の記述からは一文が削除されています**（②に記載）。
+**Claude Haiku 4.5 について**: 期限（10月15日）を過ぎて9日目です。**廃止予告は今日時点でも出ていません。**
 
 ---
 
@@ -285,25 +313,23 @@ Code Review（1項目）
 
 取得できた一次情報
 
-- Claude Code CHANGELOG（2.1.308 と 2.1.307）
-- npm `@anthropic-ai/claude-code` 最新版情報（2.1.308。**CHANGELOG と一致**）
-- Claude Platform リリースノート（10月22日付2件）
-- **Claude Platform ドキュメント「Claude Models on Google Cloud (Anthropic managed)」本文**（`platform.claude.com/docs/en/build-with-claude/claude-models-on-google-cloud/anthropic-managed`、50,443バイト取得）— ②③⑤の Google Cloud に関する記述は、すべてこのページからの引用です
-- 価格表（`pricing.md`）
-- モデル廃止一覧（`model-deprecations.md`）
-- モデル概要（`models-overview.md`）
-- Claude Platform ドキュメント目次（新規ページなし。表示名の整理2件）
+- Claude Code CHANGELOG（2.1.309、79項目）
+- npm `@anthropic-ai/claude-code` 最新版情報（2.1.309。**CHANGELOG と一致**）
+- Claude Platform リリースノート（新規1件 + 既存26項目の整理）
+- Claude Platform ドキュメント目次（新規13ページ）
+- 価格表（`pricing.md`）— 名称の置き換えのみ。数字の変更なし
+- モデル概要（`models-overview.md`）— Anthropic managed の行を追加
+- モデル廃止一覧（`model-deprecations.md`）— 変更なし
 - Claude Code ドキュメント目次 — 変更なし
 
 補足（未確認・二次情報）
 
-WebSearch で3件検索しました（Claude Cowork / Anthropic の発表 / Google Cloud の新プラットフォーム）。**一次情報で裏が取れたものはありません。いずれも未確認です**（このクラウド環境から anthropic.com / claude.com への接続はブロックされています）。
+WebSearch で2件検索しました（Claude Tag API / Anthropic の10月23日の発表）。**一次情報で裏が取れた新しい事実はありません。いずれも未確認です**（このクラウド環境から anthropic.com / claude.com への接続はブロックされています）。
 
-- **Google Cloud の新プラットフォームについて**: 今日の一次情報（Platform リリースノートとドキュメント本文）で確認できました。一方 **Google 側の発表は見つかりませんでした。** 検索で出てきたのは従来の Vertex AI 版（Google managed）の資料で、**10月2026 の発表は見つかりません。** Google 側のページでは Claude Fable 5.1 の引退日が「2027年3月1日より前にはならない」、Claude Opus 5 が「2027年1月24日より前にはならない」と記載されているという情報がありました（**Anthropic 側のモデル廃止一覧の日付とは別の数字です。②で書いた「2つは別のスケジュールに従う」の実例に見えますが、Google 側のページは未確認です**）
-- **Claude Cowork について**: 公式のリリースノートで10月付の Cowork の項目は見つかりませんでした。第三者サイト（SmartScope）の記事に「**Pro と Max プランの Cowork の新しいタスクが 2026年10月6日からクラウド実行に移り、ローカル実行のみの設定「Only on your computer」が削除される。既存のローカルのタスクは端末上で完了まで動き続けられる**」という記述がありましたが、**一次情報では確認できていません。未確認**です
-- **Anthropic の発表について**: 10月22日付の発表は見つかりませんでした。10月15日付の報道として「**14日にサンフランシスコで IPO 前の決算説明会を開き、第3四半期の売上 168億ドル（前四半期比 45%増）と、同四半期に調整後の黒字化を達成したと報告した**」「**上場は11月の米中間選挙後にずれ込む可能性がある**」というものがありました。**いずれも二次情報で、引用元自身が「一次情報を確認するように」と注意書きを付けています。未確認**です
+- **Claude Tag について**: 今日の一次情報は **API の公開**です。一方、検索で出てきたのは **Claude Tag 自体の2026年6月の立ち上げ**についての報道で、**10月付のものはありませんでした。** 報道の内容は「**2026年6月23日に、Slack を使う Claude Enterprise と Team の顧客向けの beta として立ち上げられた**」「**旧来の Claude in Slack アプリを置き換え、旧アプリは8月3日に終了**」「**Claude Opus 4.8 で動く**」「**管理者がチャンネルごとに、どのツールと情報にアクセスできるかを決められ、組織とチャンネルの両方のレベルでトークンの支出上限を設定でき、活動のログを見られる**」「**新しい依頼なしに Claude が情報を持ち出したり、止まっている仕事を追いかけたりする ambient モードが任意で使える**」というものでした。**管理者が設定できる項目の話は、今日の API の説明（チャンネルとワークスペースの設定を読み書きする）と整合しますが、報道自体は未確認**です。あわせて「**社内版が Anthropic の製品チームのコードの65%を書いている**」という会社の自己申告の数字が報じられていますが、**引用元自身が「独立した測定による裏付けはない」と注記しています**
+- **Anthropic の発表について**: **10月23日付の発表は見つかりませんでした。** 検索結果は古い項目ばかりで、特定の日の発表は確認できませんでした
 
-過去数日から持ち越しの未確認分（Claude for Government、Claude Frontier Academy の1億ドル、Claude Dashboards と Claude Motion の beta、Docs / Slides / Design の beta 終了と全プラン提供、Claude for Google Workspace、Project Glasswing の 129,000件、利用規約の更新、量子回路の研究、NIST 暗号のシード値の件、中間選挙への対応、Genesis Mission の1億5,000万ドル、Anthropic Public Benefit Fund、サソリの神経毒の研究、Claude が Anthropic のモデル研究開発の26%を主導、ART 酵素の先行性をめぐる争い、Claude Code projects のベータ、Claude for Small Business、Claude for Financial Advisors、Claude Design の移行の詳細、user profiles の料金とベータヘッダの詳細）は、今日も一次ソースに現れていません。**引き続き未確認**です。
+過去数日から持ち越しの未確認分（Claude Cowork のクラウド実行への移行、Claude for Government、Claude Frontier Academy の1億ドル、Claude Dashboards と Claude Motion の beta、Docs / Slides / Design の beta 終了と全プラン提供、Claude for Google Workspace、Project Glasswing の 129,000件、利用規約の更新、量子回路の研究、NIST 暗号のシード値の件、中間選挙への対応、Genesis Mission の1億5,000万ドル、Anthropic Public Benefit Fund、サソリの神経毒の研究、Claude が Anthropic のモデル研究開発の26%を主導、ART 酵素の先行性をめぐる争い、Claude Code projects のベータ、Claude for Small Business、Claude for Financial Advisors、Claude Design の移行の詳細、user profiles の料金とベータヘッダの詳細、第3四半期の決算と IPO の時期）は、今日も一次ソースに現れていません。**引き続き未確認**です。
 
 ---
 
