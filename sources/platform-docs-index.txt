@@ -206,7 +206,7 @@ The full documentation is available in the following languages on https://platfo
 - [Limit key to workspaces](https://platform.claude.com/docs/en/manage-claude/cmek-aws-kms-workspaces.md) - Limit an AWS KMS key to specific workspaces
 - [Organizations, users, roles, groups, and settings](https://platform.claude.com/docs/en/manage-claude/compliance-org-data.md) - List organizations, users, roles, groups, and settings
 - [Manage WIF with the Admin API](https://platform.claude.com/docs/en/manage-claude/wif-admin-api.md)
-- [Overview](https://platform.claude.com/docs/en/manage-claude/opentelemetry.md) - OpenTelemetry for the Claude API
+- [Overview](https://platform.claude.com/docs/en/manage-claude/opentelemetry.md) - OpenTelemetry tracing for the Claude API
 - [Organization webhooks (beta)](https://platform.claude.com/docs/en/manage-claude/organization-webhooks.md) - Organization webhooks
 - [Plugins API](https://platform.claude.com/docs/en/manage-claude/plugins-api.md)
 - [Activity Feed](https://platform.claude.com/docs/en/manage-claude/compliance-activity-feed.md) - Query the Activity Feed
