@@ -292,7 +292,7 @@ The full documentation is available in the following languages on https://platfo
 - [Model cards](https://platform.claude.com/docs/en/resources/overview.md)
 - [Models overview](https://platform.claude.com/docs/en/models/overview.md)
 - [Overview](https://platform.claude.com/docs/en/release-notes/system-prompts/overview.md) - System prompts
-- [API credits for subscribers](https://platform.claude.com/docs/en/about-claude/api-credits-for-subscribers.md) - API credits for Max and Team plans
+- [API credits for subscribers](https://platform.claude.com/docs/en/about-claude/api-credits-for-subscribers.md) - API credits for Max, Ultra, and Team plans
 - [Choosing a model](https://platform.claude.com/docs/en/about-claude/models/choosing-a-model.md) - Choosing the right model
 - [Claude Fable 5](https://platform.claude.com/docs/en/release-notes/system-prompts/claude-fable-5.md) - Claude Fable 5 system prompts
 - [Migration guide](https://platform.claude.com/docs/en/models/fable-5-1/migration-guide.md) - Claude Fable 5.1 and Claude Mythos 5.1 migration guide
