@@ -1,65 +1,100 @@
 <!-- このファイルは scripts/finalize.sh が自動生成します。直接編集しないでください。 -->
-<!-- 編集する場合は digests/2026-11-11.md を直してから finalize.sh を再実行してください。 -->
+<!-- 編集する場合は digests/2026-11-12.md を直してから finalize.sh を再実行してください。 -->
 
-# 2026-11-11（水）Claude 更新ダイジェスト
+# 2026-11-12（木）Claude 更新ダイジェスト
 
 ## ① 今日の要点
 
-**昨日の大きな日から一転して、小さい日です。** 5つのソースに差分がありました。
+**ずっと追っていた「Claude Desktop の11月10日の変更」の中身が、今日の Web 検索でようやく出てきました。** ただし**一次情報としては取れていません（未確認）**。②に詳しく書きます。
 
-- **Claude Code が 2.1.321 → 2.1.322 に。項目はたった1件**です（Vertex での Fast mode 対応）
-- **Platform のリリースノートに1件追加。** ただし**11月9日の下ではなく、11月5日の節に後から足されています**（③に書きます）
-- **Platform のドキュメントが 890 → 900ページ（+10）。** 増えたのは**組織の管理者向けの「Security posture（セキュリティ態勢）」の一式**です
-- **Claude Code のドキュメント目次から「What's New（週刊まとめ）」の一覧が丸ごと消えました。** **ただしページ自体は生きています**（確認しました。③に書きます）
-- **価格表・モデル一覧・モデル廃止一覧は、変更なしです**
-
-**昨日（11月10日）が「Claude Desktop の変更」の予告日でしたが、今日の取得でも一次情報に何も出ていません。** ②に書きます。
+- **Claude Code は 2.1.322 のまま。CHANGELOG に新規項目はゼロ**です
+- **Platform のリリースノートに1件追加**（**Dreams が Claude Fable 5.2 に対応**）
+- **モデル一覧に「全モデルの一覧表」が新設されました。** 全21モデルの文脈窓・最大出力・価格が1つの表になりました
+- **Amazon Bedrock の呼び方が変わりました。** 「Opus 4.7 以降」「Opus 4.6 以前」という呼び分けが、**`bedrock-mantle` / `bedrock-runtime`** という名前に置き換わりました。**Fable 5.2 の Bedrock の ID も変わっています**
+- **価格表で、Claude Opus 4.8 の Fast mode の表記が「research preview」から「deprecated（廃止予告）」に変わりました。** ずっと定点観測していた箇所が、ようやく動きました
+- **価格は1つも変わっていません**（価格表の `$` の出現回数を昨日と突き合わせて確認。完全に一致しました）
 
 ---
 
 ## ② ⚠️ 今の使い方が変わるもの
 
-**今日はなし。** 新しい破壊的変更・価格改定・モデルの引退はありません。
+### 1. 【未確認・ただし内容は具体的】Claude Desktop の11月10日の変更は「Unified Claude（統合された Claude）」でした
 
-### 予告されていた「Claude Desktop の11月10日の変更」は、昨日を過ぎても一次情報に出ていません
+**先に、情報の出どころをはっきりさせます。**
 
-**今日の取得で確認したこと**:
+- **一次情報として自分で取得できたのは、11月7日の Claude Code 2.1.319 の CHANGELOG の1行だけ**です（「`desktopHome` がないのに `coworkTabEnabled: false` または `chatSessionRetentionDays` に依存しているポリシーに起動時の警告を追加。**Claude Desktop の11月10日の変更に先立つもの**」）
+- **以下の内容は、今日の Web 検索で得たものです。** **検索結果は「Anthropic の公式ドキュメントに書かれている」と述べていますが、そのページ（`claude.com/docs/third-party/claude-desktop/configuration-changelog`）は、このクラウド環境からブロックされていて自分では開けません。** **したがって未確認です**
+- **さらに、検索結果自身が次の但し書きを付けています**: 「**検索結果の日付情報が今日（2026年11月11日）と食い違っている。例えば11月10日の項目が『124日前』『119日前』と表示されている。内容に書かれている日付のほうを採った**」
 
-- **Claude Code の CHANGELOG（2.1.322）は1件だけで、デスクトップアプリに関する記述はありません**
-- **Platform のリリースノートにも、Claude Desktop の記述はありません**
-- **一次情報として残っているのは、11月7日に 2.1.319 で見つけた「11月10日の変更に先立つもの」という1行だけ**です
+**以上を踏まえたうえで、検索で出てきた内容を、間引かずに書きます。**
 
-**Web 検索でも、11月10日付の変更は確認できませんでした**（未確認）。ただし**検索で出てきたものを、間引かずに書きます**:
+**（1）11月10日の正午（太平洋時間）から、`desktopHome` が設定されていない場合、次の起動で「Unified Claude」が開きます**
 
-**検索では、「Cowork のタブが消えた・移動した」というユーザーの不具合報告が多数見つかりました。** GitHub の `anthropics/claude-code` の issue と、それを集めたサイトのものです。**いずれも Anthropic の公式発表ではなく、日付もはっきりしません**（未確認）:
+- **`coworkTabEnabled` が false でない場合**: **Chat と Advanced file analysis（高度なファイル分析）が、Cowork と一緒にオンになります。** **`chatTabEnabled` や `chatAdvancedFileAnalysisEnabled` が false であってもオンになります**
+- **`coworkTabEnabled` が false の場合**: **Cowork・Chat・Advanced file analysis は、今のままの状態（オンならオン、オフならオフ）で変わりません**
 
-- **自動更新のあとに Cowork のタブがナビゲーションから消えた**という報告が複数（挙がっているバージョンは 1.2581.0、1.2773.0、1.7196.1）
-- **「最近の更新で、Chat・Cowork・Code が、はっきりラベルの付いたタブから、サイドバーの見出しにある小さなラベルなしのアイコンに移された」**という報告。**報告者は「リリースノートに書かれていない」と述べています**
-- **「夜のうちの更新で、Claude Chat と Claude Cowork が1つの選択タブにまとめられ、Chat と Cowork のプロジェクトが1つの Projects タブに統合された」**という報告
+**（2）保存期間の設定が分かれました**
 
-**これらが11月10日の変更と関係があるかは、分かりません。** **日付がはっきりせず、公式の裏付けもありません。** **「関係がある」とも「ない」とも書きません。**
+- **新しい会話のうち Cowork のタスクであるものは、`coworkSessionRetentionDays` で削除されます。`chatSessionRetentionDays` ではありません。** **両方を設定してください**と書かれています
+- **Cowork がオンで `chatSessionRetentionDays` だけを設定している組織は、今の見え方のままになります**
 
-**なお、検索結果自身が「Anthropic の Cowork の変更履歴は claude.com/docs/cowork/changelog.md にあるが、取れたのは2026年6月の古い項目だけで、最新の内容は確認できなかった」と述べています。** **このクラウド環境からは claude.com への接続がブロックされているため、こちらでも取れません。**
+**（3）`coworkTabEnabled` は廃止予告になりました（未確認の日付が2つ増えます）**
 
-**引き続き未確認として追います。**
+- **`coworkTabEnabled` は 2026年12月17日まで受け付けられます。** 以後は **`desktopHome` を使ってください**
+- **11月17日から、まだ `coworkTabEnabled` を設定している利用者に警告が表示されます**
 
-### 日付が決まっているもの
+**（4）第三者の手引きからの注意**
+
+- **オランダ語の手引きが「`desktopHome` の値は小文字で書くこと」と注意しています。** **`Standard` のような知らない値は、アプリがオフとして読む**ためだそうです（**これは第三者の記事です。公式の記述かどうかは確認できていません**）
+
+**用語を一言で**:
+
+- **「Unified Claude」**: **Chat（ふつうの会話）と Cowork（Claude に作業を任せる機能）が、1つの画面にまとまったもの**です
+- **「`desktopHome`」**: **デスクトップアプリを開いたときに、最初に何を表示するか**を決める設定です
+- **「`coworkTabEnabled`」**: **Cowork のタブを表示するかどうか**の設定です
+- **「Advanced file analysis（高度なファイル分析）」**: **アップロードしたファイルを Claude が詳しく解析する機能**です
+- **「太平洋時間の正午」**: **日本時間では11月11日の午前5時**です（11月なので太平洋標準時。日本との差は17時間）
+
+**昨日の報告とのつながり**: **昨日、Web 検索で「Chat と Cowork が1つの選択タブにまとめられた」「Chat と Cowork のプロジェクトが1つの Projects タブに統合された」というユーザーの報告を拾いました。** **今日出てきた「Unified Claude」の説明と、話が合っています。** **ただし、どちらも未確認です。** 「同じことを指している」と断定はしません。
+
+**原さんへの関係**: **これらの設定（`desktopHome`・`coworkTabEnabled`・`chatSessionRetentionDays`）は、組織の管理者がデスクトップアプリに適用するもの**です。**原さんの個人アカウントには設定されていないはずなので、「`desktopHome` が設定されていない」状態にあたります。** **その場合「次の起動で Unified Claude が開く」ことになります。** **つまり、デスクトップアプリの見た目が変わる可能性があります。** **ただし、ここまで全部 未確認です。実際にどう見えるかは、原さんがアプリを開けば分かります。**
+
+**引き続き、一次情報が取れるかを毎日見ていきます。**
+
+### 2. Claude Opus 4.8 の Fast mode が、価格表でも「廃止予告」になりました
+
+**価格表の Fast mode の節が、今日書き換わりました。**
+
+**昨日まで**:
+> Fast mode は Claude Fable 5.2、Claude Opus 5.5、Claude Opus 5、Claude Opus 4.8 に、割増料金でかなり速い出力を提供します。**Claude Opus 5 と Claude Opus 4.8 の Fast mode は research preview です**
+
+**今日から**:
+> Fast mode は、割増料金で**出力のトークン毎秒を最大2.5倍**にします。**Claude Fable 5.2、Claude Opus 5.5、Claude Opus 5、Claude Opus 4.8 で使えます。** **Fast mode は Claude Opus 5 では research preview、Claude Opus 4.8 では deprecated（廃止予告）です**
+
+**何が変わったか**: **Opus 4.8 の Fast mode が「research preview（試験提供）」という扱いから、「deprecated（廃止予告）」という扱いに、価格表の上でも変わりました。**
+
+**これは新しい決定ではありません。** **11月1日のリリースノートに「2026年11月30日に削除する」と既に書かれていたもの**で、**価格表の表記がそれに追いついた**ということです。**削除まで18日です。**
+
+**原さんへの関係**: **ありません。** 原さんは Opus 5 を使っていて、API の Fast mode は使っていません。
+
+### 3. 日付が決まっているもの
 
 | 日付 | 内容 | 残り |
 |---|---|---|
-| ~~2026-11-10~~ | ~~Claude Desktop の変更~~（**昨日。内容は依然として不明**） | **過ぎました** |
-| 2026-11-24 | Claude Opus 4.5 の「これより前には停止しない」日 | 13日 |
-| **2026-11-30** | **Claude Sonnet 4.5 が API から停止** | **19日** |
-| **2026-11-30** | **Claude Opus 4.8 の Fast mode が削除**（削除後はエラー。標準速度にフォールバックしません） | **19日** |
-| **2026-12-14** | **単独版 Claude Design が閉鎖** | **33日** |
+| **2026-11-17** | **`coworkTabEnabled` を設定している利用者に警告が出始める**（**未確認**） | **5日** |
+| 2026-11-24 | Claude Opus 4.5 の「これより前には停止しない」日 | 12日 |
+| **2026-11-30** | **Claude Sonnet 4.5 が API から停止** | **18日** |
+| **2026-11-30** | **Claude Opus 4.8 の Fast mode が削除**（削除後はエラー。標準速度にフォールバックしません） | **18日** |
+| **2026-12-14** | **単独版 Claude Design が閉鎖** | **32日** |
+| **2026-12-17** | **`coworkTabEnabled` が受け付けられる最終日**（**未確認**） | **35日** |
 
-### 日付のないもの（持ち越し）
+### 4. 日付のないもの（持ち越し）
 
 - **API バージョン `2026-10-21`** では `temperature`・`top_p`・`top_k` が**全モデルで使えなくなります**（既定値を送っても 400 エラー）。SDK のライセンスが MIT から Apache 2.0 に変わりました
-- **Claude Fable 5.2 / Mythos 5.2**（昨日のリリース）に乗り換えるときの注意: **prefix check が全アカウントで強制**、**古い `computer_20251124` は 400 エラー**、**advisor tool は 5.2 系どうしのみ**、**30日間のデータ保持が必須**（ZDR では使えません）、**思考内容はアカウントに紐づく**
+- **Claude Fable 5.2 / Mythos 5.2** に乗り換えるときの注意: **prefix check が全アカウントで強制**、**古い `computer_20251124` は 400 エラー**、**advisor tool は 5.2 系どうしのみ**、**30日間のデータ保持が必須**（ZDR では使えません）、**思考内容はアカウントに紐づく**
 - **Fable 5.1 を選んでいた人は、Pro と Max では自動で 5.2 に移されます**（戻すには `/model claude-fable-5-1`）
-- **Claude が書いた mod が、auto モードと bypass モードでは確認なしに有効化されます**（昨日の 2.1.321）
-- **「Ultra」プラン**（月額 API クレジット $200、Max は $100）。**開始日と Max との関係は、今日も書かれていません**（**17日目**）
+- **Claude が書いた mod が、auto モードと bypass モードでは確認なしに有効化されます**（11月10日の 2.1.321）
+- **「Ultra」プラン**（月額 API クレジット $200、Max は $100）。**開始日と Max との関係は、今日も書かれていません**（**18日目**）
 - **IP 許可リスト**が beta で使えます（組織の管理者向け。**締め出しに注意**）
 - **Claude が書いた文章に透かし**が入ります（対象は Claude Mythos 5・Opus 4.7・Sonnet 4.6）
 
@@ -69,113 +104,219 @@
 
 ## ③ 今日の変更（説明つき）
 
-### 1. Claude Code 2.1.322: Vertex でも Fast mode が使えるようになりました（1件だけ）
+### 1. Dreams が Claude Fable 5.2 に対応しました
 
-**CHANGELOG の全文です。本当にこの1行だけです。**
+**Platform リリースノートの11月9日の節に、今日1件追加されました。**
 
-> **Vertex の global、us、eu のリージョンで fast mode を追加。Vertex が断った場合は標準速度にフォールバックします**
+> **Dreams**（research preview）が **Claude Fable 5.2** に対応しました
 
-**用語を一言で**:
+**「Dreams」とは**: **Anthropic が用意している「managed agents（預かり型のエージェント）」の1つ**です。**自分でサーバーを用意しなくても、Anthropic 側で動くエージェント**という仕組みです。**research preview（試験提供）**の段階です。
 
-- **「Vertex」**: **Google Cloud 経由で Claude を使う窓口**のことです（正式には Vertex AI）。**Google のクラウド契約で Claude を使う会社向け**です
-- **「リージョン」**: **サーバーがどの地域にあるか**です。`global` はどこでも、`us` はアメリカ、`eu` はヨーロッパ
-- **「Fast mode」**: **同じモデルを、割増料金で速く返させる仕組み**です
-- **「フォールバック」**: **できなかったときに、別のやり方に落とすこと**です
+**これまでの経緯**（リリースノートに残っている記録です）:
 
-**何ができるようになったか**: **Google Cloud 経由で Claude Code を使っている会社が、Fast mode を使えるようになりました。** **Vertex 側が断った場合は、エラーにならずに普通の速度で返ります**（昨日の 2.1.321 で入った「断られたらまず同じモデルの標準速度を試す」という修正と、同じ方向の作りです）。
+- 以前: **Claude Opus 5** に対応
+- その後: **Claude Opus 5.5、Claude Fable 5.1、Claude Sonnet 5.5** に対応
+- **今日: Claude Fable 5.2 に対応**
 
-**原さんへの関係**: **ありません。** 原さんは Google Cloud 経由では Claude を使っていません。
+**なお、これは「Dreams の対応モデルの完全な一覧」ではありません。** リリースノートは「追加された」という記録なので、**今どれが使えるかの全体像は、Dreams のドキュメントページを見ないと分かりません。** **そのページはこの環境から取得対象になっていないので、引き続き未確認です。**
 
-### 2. Compliance API に「Security posture（セキュリティ態勢）」が追加されました（Enterprise 向け beta）
+**原さんへの関係**: **ありません。** API を自分で呼ぶ人向けの機能です。
 
-**Platform リリースノートより。**
+### 2. モデル一覧に「全モデルの一覧表」ができました
 
-> **Compliance API に Security posture のデータが入りました。** **Claude Enterprise の組織向けの beta** です。**Activity Feed が、claude.ai の「組織の設定」の Security posture のページでの申告（attestation）の変更を記録します。** `GET /v1/compliance/organizations/{organization_id}/security_posture` というエンドポイントが、**組織の現在の Security posture の結果を返します**
+**モデル概要のページが、22,973バイト → 29,196バイト（+6,223）と大きく増えました。** **構成が変わったためです。**
 
-**用語を一言で**:
+**これまで**: 「Compare models（モデルを比べる）」という節に、**最新4モデル（Fable 5.2・Opus 5.5・Sonnet 5.5・Haiku 5.5）の詳しい比較表**があり、その下に**「Legacy models（旧版。まだ使えます）」という名前の羅列が1行**だけありました。
 
-- **「Compliance API」**: **組織の管理者が、「誰が・いつ・何をしたか」を外部の仕組みに吸い出すための窓口**です
-- **「Security posture（セキュリティ態勢）」**: **その組織のセキュリティ設定が、どういう状態になっているかの一覧**です（例えば「二段階認証が必須になっているか」のような項目）
-- **「attestation（申告）」**: **「この項目は満たしています」と組織が自己申告した記録**です
-- **「Activity Feed」**: **組織内の操作を時系列で記録する仕組み**です
-- **「エンドポイント」**: **データを取りに行く URL** です
-- **「SIEM」**: **会社のログを一か所に集めて監視する仕組み**です（下のドキュメントに出てきます）
+**今日から**: **節の名前が「Latest models（最新のモデル）」に変わり**、その下に**「All models（すべてのモデル）」という新しい節と表**ができました。**旧版の羅列1行は、この表に置き換わりました。**
 
-**ドキュメントも同時に9ページ増えました**:
+**新しい表には、全21モデルについて「文脈窓・最大出力・入力価格・出力価格」が並んでいます。**
 
-- Security posture の概要
-- **保存したイベントを現在の結果と突き合わせる**
-- **変化を検出する**
-- **イベントを OCSF に対応づける**（OCSF = ログの書き方を揃えるための業界共通の形式）
-- イベントの一覧（リファレンス）
-- 結果の一覧（リファレンス）
-- **イベントを自分の SIEM に送る**
-- 組織の Security posture を取得する（API）
-- Security Posture（API）
+| モデル | 文脈窓 | 最大出力 | 入力 | 出力 |
+|---|---|---|---|---|
+| Claude Fable 5.2 | 100万 | 12万8千 | $8 | $40 |
+| Claude Opus 5.5 | 100万 | 12万8千 | $4 | $20 |
+| Claude Sonnet 5.5 | 100万 | 12万8千 | $2 | $10 |
+| Claude Haiku 5.5 | 100万 | 12万8千 | $0.10〜 | $0.50〜 |
+| Claude Mythos 5.2（限定提供） | 100万 | 12万8千 | $8 | $40 |
+| Claude Fable 5.1 | 100万 | 12万8千 | $10 | $50 |
+| Claude Mythos 5.1（限定提供） | 100万 | 12万8千 | $10 | $50 |
+| Claude Fable 5 | 100万 | 12万8千 | $10 | $50 |
+| Claude Mythos 5（限定提供） | 100万 | 12万8千 | $10 | $50 |
+| **Claude Opus 5**（原さんの使用モデル） | **100万** | **12万8千** | **$5** | **$25** |
+| Claude Opus 4.8 | 100万 | 12万8千 | $5 | $25 |
+| Claude Opus 4.7 | 100万 | 12万8千 | $5 | $25 |
+| Claude Opus 4.6 | 100万 | 12万8千 | $5 | $25 |
+| **Claude Opus 4.5** | **20万** | **6万4千** | $5 | $25 |
+| Claude Opus 4.1（停止済み。Google managed と Bedrock を除く） | 20万 | 3万2千 | $15 | $75 |
+| Claude Opus 4（停止済み。Google managed を除く） | 20万 | 3万2千 | $15 | $75 |
+| Claude Sonnet 5 | 100万 | 12万8千 | $2 | $10 |
+| Claude Sonnet 4.6 | 100万 | 12万8千 | $3 | $15 |
+| **Claude Sonnet 4.5** | **20万** | **6万4千** | $3 | $15 |
+| Claude Sonnet 4（停止済み。Google managed と Bedrock を除く） | 20万 | 6万4千 | $3 | $15 |
+| **Claude Haiku 4.5** | **20万** | **6万4千** | $1 | $5 |
 
-**原さんへの関係**: **ありません。** これは **Claude Enterprise（大企業向けの契約）の管理者向け**の機能です。
+**この表で初めてはっきりしたこと**: **Opus 4.5・Sonnet 4.5・Haiku 4.5 の3つは、文脈窓が20万トークン**です（**今の世代の100万トークンの5分の1**）。**最大出力も6万4千で、今の世代の半分**です。**これまでのモデル概要には、この数字は最新4モデルぶんしか載っていませんでした。**
 
-### 3. このリリースノートは、11月9日の下ではなく「11月5日」の節に後から足されています
+**表の下に、3つの注記が付きました**:
 
-**気づいたことなので、そのまま書きます。**
+- **「MTok」**: 100万トークンのこと。「$5 / MTok」は「100万トークンあたり $5」
+- **「限定提供」**: **Anthropic の審査プログラム（Cyber Verification Program など）で確認された組織だけが使えます。** 使いたい場合は、該当するプログラムに申し込んでください
+- **「停止済み」**: **他のクラウドプラットフォームではまだ使える場合があります**
 
-**上の Security posture の項目は、今日初めて取得できたもの**です。**ところがリリースノートの中での位置は、一番上の「11月9日」の節ではなく、その下の「11月5日」の節**です。
+**あわせて、説明文から1文が消えました**: **「それぞれのモデルのページに、使えるプラットフォームが載っています」**という案内がなくなりました（**新しい表がその役割を引き継いだのかもしれませんが、理由は書かれていません**）。
 
-**つまり**: **11月5日の日付で、後から書き足されました。** **リリースノートの先頭の日付は、今日も「11月9日」のまま**です。
+### 3. Amazon Bedrock の呼び方が、全面的に変わりました
 
-**なぜそうなっているかは書かれていません。** 推測はしません。**ただ、「リリースノートの先頭の日付が変わらなくても、過去の日付の節に項目が増えることがある」ということは、記録しておきます。**
+**Amazon Bedrock は、Amazon のクラウド経由で Claude を使う窓口**です。
 
-### 4. Claude Code のドキュメント目次から「What's New（週刊まとめ）」の一覧が丸ごと消えました
+**これまでは「モデルの世代で呼び分け」ていました**:
 
-**Claude Code のドキュメント目次が、63,658バイト → 58,181バイト（-5,477）と、初めて大きく縮みました。**
+- 「Amazon Bedrock（**Opus 4.7 以降**）」
+- 「Amazon Bedrock（**Opus 4.6 以前**）」
 
-**消えたのは、「What's New」という節の全部**です:
+**今日からは「接続先の名前で呼び分け」になりました**:
 
-- **週刊まとめの入口のページ**（「Claude Code の注目機能を、コード例とデモと背景つきで毎週まとめたもの」という説明つき）
-- **週ごとのページ24本**（Week 13・2026年3月23〜27日 から Week 37・2026年9月7〜11日 まで）
+- 「Amazon Bedrock（**mantle**）」= **`bedrock-mantle`**
+- 「Amazon Bedrock（**runtime**）」= **`bedrock-runtime`**
 
-**ページ自体は生きています。** **`whats-new/index.md` と、一番新しい `2026-w37.md` に実際に当たってみて、どちらも正常に返ってくる（HTTP 200）ことを確認しました。** **消えたのは目次（索引）からだけ**です。
+**この変更は4つのソースに同時に入っています**: モデル廃止一覧、モデル概要、Platform ドキュメント目次、価格表。
 
-**各言語版の説明文を見ると、「Nouveautés」「Neuigkeiten」「新機能」「새로운 기능」「Что нового」という節名が、今も載っています。** **つまり節そのものは残っていて、英語版の目次から一覧が外れただけ**と見られます。
+**モデル概要の説明文も書き換わりました**:
 
-**なぜ外れたのかは、どこにも書かれていません。** 推測はしません。
+**これまで**: 「Bedrock の Messages API のエンドポイントでの ID（**Opus 4.7 以降と Haiku 4.5**）。Bedrock の InvokeModel 経由でしか提供されないモデルは、そちらの ID を表示します」
 
-**ひとつ記録しておくこと**: **一番新しい週刊まとめが Week 37（9月7〜11日）**です。**今日は11月11日なので、2か月間 更新されていません。** **更新が止まっているページが目次から外れた、という見方もできますが、裏付けはありません。**
+**今日から**: 「Bedrock の **bedrock-mantle** のエンドポイントでの ID。**Bedrock が bedrock-runtime のエンドポイントでしか提供しないモデル**は、その推論プロファイル ID を表示します」
 
-### 5. 各言語版ドキュメントの説明文が、その言語の節名になりました
+**そして、Claude Fable 5.2 の Bedrock の ID 自体が変わりました**:
 
-**これまで**: 「French (228 pages): Documentation for French.」（**どの言語も英語で「〜語のドキュメント」とだけ**）
+- **昨日**: `anthropic.claude-fable-5-2`
+- **今日**: **`global.anthropic.claude-fable-5-2`**（**先頭に `global.` が付きました**）
 
-**今日から**: 「French (228 pages): Premiers pas, Développer avec Claude Code, Plugins, Administration, Configuration, Référence, SDK Agent, Nouveautés, Ressources.」（**その言語で、中身の節名が並ぶ**）
+**さらに、11月9日のリリースノートの「どこで使えるか」の書き方も変わりました**:
 
-**日本語版はこうなっています**: **「はじめに, Claude Code で構築, プラグイン, 管理, 設定, リファレンス, Agent SDK, 新機能, リソース」**
+- **昨日**: 「Claude API、Claude Platform on AWS、Claude Models on Google Cloud（Anthropic managed）で使えます。**Claude in Amazon Bedrock でも使えます。** Claude Models on Google Cloud（Google managed）でも使えます。Claude in Microsoft Foundry でも使えます」（**「〜でも使えます」が3回続く、やや雑な文でした**）
+- **今日**: 「Claude API、**Amazon Bedrock（`bedrock-runtime`）**、Claude Platform on AWS、Claude Models on Google Cloud（Anthropic managed）、Claude Models on Google Cloud（Google managed）、Claude in Microsoft Foundry で使えます」（**1文にまとまり、Bedrock がどちらの接続先かが明記されました**）
 
-**何ができるようになったか**: **目次だけ見て、その言語版に何の節があるかが分かるようになりました。** ページ数は**どの言語も228ページで変わっていません。**
+**つまり**: **Fable 5.2 は Bedrock では `bedrock-runtime` のほう（これまで「Opus 4.6 以前」と呼ばれていたほう）で提供されている**、と書き換わりました。
 
-### 6. 「ユーザーのサインアウト（Beta）」の API ページが、目次に現れました
+**なぜこの呼び方に変えたのかは、どこにも書かれていません。** 推測はしません。
 
-**Platform のドキュメント目次に、新しく1行入りました。**
+**原さんへの関係**: **ありません。** 原さんは Amazon のクラウド経由では Claude を使っていません。
 
-> **Sign Out User (Beta)** — `https://platform.claude.com/docs/en/api/beta/organization/users/sign_out.md`
+### 4. キャッシュ料金の説明が、表になりました（金額は変わっていません）
 
-**これは11月5日に報告した項目のページ**です。**そのときのリリースノートには「組織の管理者が、ユーザーを全デバイスから強制的にサインアウトさせられる」という内容がありました。** **11月6日の時点では、このページは目次に載っていませんでした**（昨日の目次を検索して確認しました。0件でした）。
+**これまでは、1つの長い文の中に全モデルのキャッシュ料金が詰め込まれていました。** **今日から、表になりました。**
 
-**つまり**: **機能の発表が11月5日、ドキュメントのページが目次に載ったのが今日**です。**6日遅れ**でした。
+| モデル | キャッシュ読み出しの倍率 | 100万トークンあたり |
+|---|---|---|
+| Claude Fable 5.2 / Mythos 5.2 | 0.025倍 | $0.20 |
+| Claude Fable 5.1 / Mythos 5.1 | 0.025倍 | $0.25 |
+| Claude Opus 5.5 | 0.05倍 | $0.20 |
+| Claude Sonnet 5.5 | 0.05倍 | $0.10 |
+| **その他すべてのモデル** | **0.1倍** | 価格表の各モデルの欄を参照 |
 
-**原さんへの関係**: **ありません。** 組織の管理者向けの機能です。
+**「キャッシュ」とは**: **同じ内容を何度も送るとき、2回目以降を安くする仕組み**です。**最初に保存するとき（書き込み）に割増がかかり、読み出すときが大幅に安くなります。**
+
+**「元が取れるタイミング」も、箇条書きに整理されました**:
+
+- **5分間の保存（書き込みは1.25倍）**: **1回読み出せば元が取れます**
+- **1時間の保存（書き込みは2倍）**: **2回読み出せば元が取れます**
+
+**上の表の中の「倍率」の表も簡略化され、「Cache read (hit)」の欄が「ほとんどのモデルで 0.1倍」という短い書き方になりました**（詳細は新しい表のほうに移りました）。
+
+**金額は1つも変わっていません。** 価格表の `$` の出現回数を昨日と突き合わせて、**完全に一致することを確認しました。**
+
+### 5. 「メッセージごとの effort（beta）」というページができました
+
+**Platform のドキュメントが 900 → 901ページ（+1）。増えたのは1ページです。**
+
+> **Per-message effort (beta)** — `https://platform.claude.com/docs/en/build-with-claude/effort-per-message.md`
+
+**「effort」とは**: **Claude にどれくらい考えさせるかの段階**です（low / medium / high / xhigh / max）。**高くするほど、よく考えますが、遅くなり、トークンも多く使います。**
+
+**これまでは、1回のやりとり全体で1つの effort を指定するものでした。** **新しいページの名前からすると、メッセージごとに変えられるようになるもの**と読めますが、**ページの中身は取得していないので、それ以上のことは書きません。** **ページが存在すること（HTTP 200 で返ること）は確認しました。**
+
+**あわせて、これまでの「Effort」のページが「Overview（概要）」という表示名に変わりました**（URL は同じです）。**節が2ページ構成になったので、入口を「概要」に改名した形**です。
+
+**原さんへの関係**: **ありません。** API を自分で呼ぶ人向けです。（原さんの環境の effort は high に設定されていますが、それは Claude Code の設定で、ここで言う beta の機能とは別です。）
+
+### 6. Claude Code の各言語版が 228 → 203ページに。昨日の「What's New 消滅」が全言語に広がりました
+
+**昨日、英語版の目次から「What's New（週刊まとめ）」の一覧25本（入口1本 + 週ごと24本）が丸ごと消えたことを報告しました。**
+
+**今日、各言語版のページ数が 228 → 203 に減りました。差は25**です。**昨日消えた本数とぴったり一致します。**
+
+**各言語版の説明文からも、「新機能」にあたる節名が消えました**:
+
+- フランス語: Nouveautés が消えた
+- ドイツ語: Neuigkeiten が消えた
+- **日本語: 新機能 が消えた**（今日の表記は「はじめに, Claude Code で構築, プラグイン, 管理, 設定, リファレンス, Agent SDK, リソース」）
+- 韓国語: 새로운 기능 が消えた
+- ロシア語: Что нового が消えた
+- ほか、イタリア語・スペイン語・中国語（簡体・繁体）・インドネシア語・ブラジルポルトガル語も同様
+
+**ただし、ページ自体は今日も生きています。** **昨日と同じく、`whats-new/index.md` と `whats-new/2026-w37.md` に直接当たって、どちらも HTTP 200 で返ることを確認しました。**
+
+**つまり**: **「What's New」という節が、ドキュメントの構成から外された**（目次にも載らず、ページ数にも数えられなくなった）**けれど、URL を直接叩けばまだ読める**、という状態です。
+
+**なぜ外したのかは、どこにも書かれていません。** 推測はしません。
+
+### 7. 「Claude SDK」が「Anthropic SDK」に呼び戻されました
+
+**Platform ドキュメント目次の中で、2か所の名前が変わりました。**
+
+- **「最新版の各 Claude Platform SDK と ant CLI は〜」→「最新版の各 Anthropic SDK と ant CLI は〜」**
+- **「Get Claude SDK spans（Claude SDK のスパンを取得）」→「Get Anthropic SDK spans（Anthropic SDK のスパンを取得）」**（説明文も「Claude SDK で OpenTelemetry を設定」→「Anthropic SDK で OpenTelemetry を設定」）
+
+**「SDK」とは**: **プログラムから Claude を呼ぶための、言語ごとの部品一式**です。
+
+**何が起きたか**: **以前「Anthropic SDK」から「Claude SDK」に名前が変わっていたものが、今日「Anthropic SDK」に戻りました。** **理由はどこにも書かれていません。**
 
 ---
 
 ## ④ 一行で流すもの
 
-**今日は、上に書いた以外の項目がありません。**
+**今日は「言い回しの整理」がたくさん入りました。中身が変わっていないものも、省かずに並べます。**
 
-- **Claude Code 2.1.322 の項目は1件だけ**で、それは③に書きました
-- **Platform リリースノートの新規項目は1件だけ**で、それは③に書きました
-- **モデル概要・モデル廃止一覧・価格表は、バイト単位で昨日と同一**です
-- **npm の情報の変更は、バージョン番号（2.1.321 → 2.1.322）だけ**です
+**ドキュメント目次の名前の変更**
 
-**間引いたものはありません。**
+- **「Versions」→「API versions」**（API のバージョンのページ。URL は同じ）
+
+**モデル概要の文言**
+
+- **キャッシュ読み出しの注記から、Mythos 5.2 と Mythos 5.1 の名前が消えました。** 今日の書き方は「2.5% on Claude Fable 5.2 and Claude Fable 5.1」です。**ところが価格表のほうの新しい表には、Mythos 5.2 と Mythos 5.1 が 0.025倍として載ったままです。** **2つの一次情報の書き方が食い違っています。** どちらが正しいかは書かれていないので、**判断しません。記録だけしておきます**
+- 「それぞれのモデルのページに、使えるプラットフォームが載っています」という1文が削除されました
+
+**リリースノートの過去の項目の書き直し**（**内容は変わっていません。読みやすさの手直しです**）
+
+- **Fable 5.2 の「思考内容の引き継ぎ」の項目が、1つから2つに分けられました。** 「5.2 は他のモデルの思考を読める」と「他のモデルは 5.2 の思考を読めない」が、別々の項目になりました
+- **Fable 5.1 の発表の項目**: 「Project Glasswing の参加者向けに Mythos 5.1 も」という部分が独立した文になり、**参照先が「What's new in Claude Fable 5.1」から「Claude Fable 5.1（概要ページ）」に変わりました**
+- **Opus 5 の発表の項目**: 参照先が「What's new in Claude Opus 5」から「Claude Opus 5（概要ページ）」に変わりました
+- **Opus 5 の「effort が xhigh / max のときは thinking を切れない」の項目**: 参照先が「What's new in Claude Opus 5」から「**Effort with thinking**」という別のページに変わりました
+- **Sonnet 5 の発表の項目**: 参照先が「What's new in Claude Sonnet 5」から「Claude Sonnet 5（概要ページ）」に変わりました
+
+**※ 上の4件はいずれも「What's new in 〜」というページへの案内が「概要ページ」などに差し替わっています。** **Claude Code 側で「What's New」が目次から外れたのと同じ時期に起きていますが、関係があるかは書かれていません。断定しません。**
+
+**価格表の言い回しの整理**（**金額は変わっていません**）
+
+- 「最新の価格は claude.com/pricing を**訪問してください**」→「〜**の Claude pricing のページを見てください**」
+- Bedrock のエンドポイントの案内が、**「どちらの接続先を呼ぶかで分かれます」という書き方**に変わりました
+- **CCU（Claude Consumption Unit）の説明**で、**「e.g.」→「for example」**、**「will be invoiced」→「is invoiced」**、**「claude.com/pricing#api」→「Claude pricing のページの API の節」**に変更（**AWS と Azure の2か所、どちらも同じ変更**）
+- CCU の表の中の案内が「Claude API pricing」→「**Model pricing**」に変更（2か所）
+- 「Bedrock pricing」→「**Amazon Bedrock** pricing」、「Bedrock」→「**Amazon Bedrock**」に統一
+- 「tool use pricing」→「**tool use overview の中の** tool use pricing」（computer use と browser use の2か所）
+- 「Vision pricing」→「**Resolution and token cost**」（2か所）
+- computer use と browser use の**トークン数の説明文が、括弧書きをやめて2文に分割**（「約4,500トークン（Sonnet 5 では約4,590、他は約4,520）」→「約4,500トークン: Sonnet 5 では約4,590、他のモデルでは約4,520」）
+- 「about 735 input tokens **per** tool definition」→「**for each** tool definition」
+- 「Enterprise のお客様は**営業に連絡**してください」→「**営業にメール**してください」
+- 「営業チームに sales@anthropic.com か Claude Console から連絡してください」→「**メールするか、Claude Console から営業に連絡してください**」（語順の入れ替え）
+- 「Claude Console の platform.claude.com で」→「**Claude Console で**」（URL はリンクに）
+- 「新規利用者は **a small amount of** free credits を受け取ります」→「新規利用者は **free credits** を受け取ります」（**「少額の」という言葉が消えました。金額はどちらにも書かれていません**）
+
+**モデル廃止一覧**
+
+- **Bedrock の2つのリンクのラベルが変わっただけ**です（「Amazon Bedrock」→「Amazon Bedrock（`bedrock-mantle`）」、「Amazon Bedrock（Opus 4.6 and earlier）」→「Amazon Bedrock（`bedrock-runtime`）」）。**表の中身（モデルの行・日付）は1行も変わっていません**（突き合わせて確認しました）
 
 ---
 
@@ -183,47 +324,43 @@
 
 | 項目 | 今日 | 前日 |
 |---|---|---|
-| Claude Code（npm） | **2.1.322** | 2.1.321 |
-| CHANGELOG 最新 | **2.1.322** | 2.1.321 |
+| Claude Code（npm） | **2.1.322**（変化なし） | 2.1.322 |
+| CHANGELOG 最新 | **2.1.322**（変化なし） | 2.1.322 |
 | npm と CHANGELOG | **一致** | 一致 |
-| CHANGELOG の新規項目 | **1**（追加1） | 118 |
-| Platform リリースノートの新規項目 | **1**（**11月5日の節に追加**） | 8 |
+| CHANGELOG の新規項目 | **0** | 1 |
+| Platform リリースノートの新規項目 | **1**（**11月9日の節に追加**） | 1 |
 | Platform リリースノートの先頭の日付 | **11月9日**（変化なし） | 11月9日 |
-| Platform ドキュメントのページ数 | **900**（+10） | 890 |
-| Claude Code ドキュメント目次 | **縮みました**（-5,477バイト） | — |
-| 変更のあったソース | **5 / 8** | 8 / 8 |
+| Platform ドキュメントのページ数 | **901**（+1） | 900 |
+| Claude Code ドキュメント（各言語版） | **203ページ**（-25） | 228 |
+| 変更のあったソース | **6 / 8** | 5 / 8 |
 | ソース取得 | **8 / 8 成功** | 8 / 8 成功 |
 
 **取得サイズ**
 
 | ソース | 今日 | 前日 | 差 |
 |---|---|---|---|
-| Claude Code CHANGELOG | 1,193,584 | 1,193,457 | +127 |
-| Claude Code ドキュメント目次 | 58,181 | 63,658 | **-5,477** |
-| Platform リリースノート | 144,497 | 143,847 | +650 |
-| Platform ドキュメント目次 | 99,918 | 98,428 | +1,490 |
-| モデル概要 | 22,973 | 22,973 | **0** |
-| モデル廃止一覧 | 14,830 | 14,830 | **0** |
-| 価格表 | 55,227 | 55,227 | **0** |
+| Claude Code CHANGELOG | 1,193,584 | 1,193,584 | **0** |
+| Claude Code ドキュメント目次 | 58,034 | 58,181 | -147 |
+| Platform リリースノート | 144,651 | 144,497 | +154 |
+| Platform ドキュメント目次 | 100,027 | 99,918 | +109 |
+| モデル概要 | 29,196 | 22,973 | **+6,223** |
+| モデル廃止一覧 | 14,846 | 14,830 | +16 |
+| 価格表 | 55,419 | 55,227 | +192 |
 | npm のバージョン情報 | 371 | 371 | 0 |
 
-**モデル概要・モデル廃止一覧・価格表の3つは、バイト単位で昨日と完全に同一です。** **昨日 Fable 5.2 が入った直後なので、追加の修正は今日は入っていません。**
+**CHANGELOG と npm の情報は、バイト単位で昨日と完全に同一です。** **Claude Code は2日続けて 2.1.322 のまま**です。
 
-**増えた Platform ドキュメントのページ（10件）**
-
-Security posture 関係が9件（③に一覧があります）と、**「Sign Out User (Beta)」が1件**です。
-
-モデル一覧（**昨日からの変更はありません**）
+モデル一覧（**今日の変更はありません。価格も停止日も昨日と同じです**）
 
 | モデル | 状態 | 停止日 | 入力 / 出力（1Mトークンあたり） |
 |---|---|---|---|
-| claude-fable-5-2 / claude-mythos-5-2 | 現行（昨日から） | 2027-11-09 以降 | $8 / $40（Fast mode $16 / $80） |
-| claude-fable-5-1 / claude-mythos-5-1 | 現行（legacy） | 2027-09-01 以降 | $10 / $50 |
-| claude-fable-5 / claude-mythos-5（透かしの対象） | 現行（legacy） | 2027-06-09 以降 | $10 / $50 |
+| claude-fable-5-2 / claude-mythos-5-2 | 現行 | 2027-11-09 以降 | $8 / $40（Fast mode $16 / $80） |
+| claude-fable-5-1 / claude-mythos-5-1 | 現行 | 2027-09-01 以降 | $10 / $50 |
+| claude-fable-5 / claude-mythos-5（透かしの対象） | 現行 | 2027-06-09 以降 | $10 / $50 |
 | claude-mythos-preview | 廃止予告 | 未定 | — |
 | claude-opus-5-5 | 現行 | 2027-09-22 以降 | $4 / $20 |
 | **claude-opus-5**（原さんの使用モデル） | **現行** | 2027-07-24 以降 | **$5 / $25** |
-| claude-opus-4-8 | 現行（**Fast mode は 2026-11-30 に削除**） | 2027-05-28 以降 | $5 / $25 |
+| claude-opus-4-8 | 現行（**Fast mode は 2026-11-30 に削除。今日から価格表でも「廃止予告」表記**） | 2027-05-28 以降 | $5 / $25 |
 | claude-opus-4-7（透かしの対象） | 現行（Fast mode は削除済み） | 2027-04-16 以降 | $5 / $25 |
 | claude-opus-4-6 | 現行（Fast mode は削除済み） | 2027-02-05 以降 | $5 / $25 |
 | claude-opus-4-5-20251101 | 現行 | 2026-11-24 以降 | $5 / $25 |
@@ -236,43 +373,52 @@ Security posture 関係が9件（③に一覧があります）と、**「Sign O
 | claude-haiku-3-5 | 停止済み（Google managed の Google Cloud を除く） | — | 価格表から削除済み |
 | claude-opus-4-1 / 4, claude-sonnet-4, claude-3-7-sonnet, claude-3-haiku | 停止済み | — | Opus 4.1 と Sonnet 4 は価格表に残っています |
 
-**価格は1つも変わっていません**（価格表がバイト単位で同一なので、確認する必要もありませんでした）。
+**価格は1つも変わっていません。** 価格表の `$` の出現回数を昨日と突き合わせて、**完全に一致することを確認しました**（増減ゼロ）。
 
-**Claude Haiku 4.5 について**: 期限（10月15日）を過ぎて**27日目**です。**廃止予告は今日時点でも出ていません。**
+**Claude Haiku 4.5 について**: 期限（10月15日）を過ぎて**28日目**です。**廃止予告は今日時点でも出ていません。**
 
-**Claude Opus 4.8 の Fast mode について**: **価格表は今日変わっていないので、記載は昨日と同じまま**です（「research preview」のまま、削除の予告は Platform リリースノートの11月1日の項目に残っています）。**削除まで19日です。**
+**Claude Opus 4.8 の Fast mode について**: **今日、価格表の表記が「research preview」から「deprecated（廃止予告）」に変わりました。** **削除まで18日です。**
 
 ---
 
 ## ⑥ 🔗 出典
 
-取得できた一次情報（**8/8 成功。5件に差分、3件は変更なし**）
+取得できた一次情報（**8/8 成功。6件に差分、2件は変更なし**）
 
-- Claude Code CHANGELOG — **2.1.322**（1件）
-- npm `@anthropic-ai/claude-code` 最新版情報 — **2.1.322**
-- Claude Platform リリースノート — **1件追加**（Compliance API の Security posture。**11月5日の節に**）
-- Claude Platform ドキュメント目次 — **900ページ（+10）**
-- Claude Code ドキュメント目次 — **「What's New」の節を丸ごと削除（-5,477バイト）**、各言語版の説明文をその言語の節名に変更
-- モデル概要（`models-overview.md`）— **変更なし**
-- モデル廃止一覧（`model-deprecations.md`）— **変更なし**
-- 価格表（`pricing.md`）— **変更なし**
+- Claude Code CHANGELOG — **変更なし**（2.1.322 のまま）
+- npm `@anthropic-ai/claude-code` 最新版情報 — **変更なし**（2.1.322）
+- Claude Platform リリースノート — **1件追加**（Dreams が Fable 5.2 に対応。**11月9日の節に**）+ 過去の項目の書き直し5件
+- Claude Platform ドキュメント目次 — **901ページ（+1）**。「Per-message effort (beta)」が新設、名前の変更4件
+- Claude Code ドキュメント目次 — 各言語版が **228 → 203ページ**、説明文から「新機能」の節名が消滅
+- モデル概要（`models-overview.md`）— **「All models」の表を新設（+6,223バイト）**、Bedrock の ID と説明を変更
+- モデル廃止一覧（`model-deprecations.md`）— Bedrock のリンクのラベルのみ変更。**表の中身は1行も変わっていません**
+- 価格表（`pricing.md`）— **Opus 4.8 の Fast mode を「廃止予告」に**、キャッシュ料金を表に、言い回しの整理多数。**金額は変更なし**
 
 **自分で確認したこと**（一次情報。推測ではありません）
 
-- **`whats-new/index.md` と `whats-new/2026-w37.md` に直接当たって、どちらも HTTP 200 で返ることを確認しました。** **ページは消えておらず、目次から外れただけ**です
-- **「Sign Out User (Beta)」が昨日の目次には1件もなく、今日1件あることを確認しました**
+- **`whats-new/index.md` と `whats-new/2026-w37.md` が、今日も HTTP 200 で返ることを確認しました**（2日連続）
+- **`effort-per-message.md` が HTTP 200 で返ることを確認しました**
+- **価格表の `$` の出現回数が、昨日と完全に一致することを確認しました**
+- **モデル廃止一覧の表の行が、1行も変わっていないことを確認しました**
 
 補足（未確認・二次情報）
 
-**WebSearch を2件行いました。どちらも新しい一次情報は得られませんでした。**（このクラウド環境から anthropic.com / claude.com への接続はブロックされています。）
+**WebSearch を2件行いました。**
 
-- **「Claude Desktop の11月10日の変更」は、今日の検索でも確認できませんでした**（未確認）。**検索で出てきたのは、「Cowork のタブが消えた・移動した」というユーザーの不具合報告の束**で、**公式発表ではなく、日付もはっきりしません**（②に内容を書きました）
-- **「Anthropic の11月10日の発表」も、見つかりませんでした**（未確認）。**出てきたもので一番新しいのは2026年5月付**で、**Claude Opus 4.8 の発表と、$650億のシリーズ H（評価額 $9,650億）**、**「3か月で売上の年換算が3倍以上の470億ドルになった」**という内容でした。**検索結果自身が「網羅的ではない。Anthropic の公式ニュースページを確認するのが一番よい」と述べています**
-- **なお、11月9日のダイジェストに書いた「IPO と $2兆の評価額」の二次情報は、今日の検索では出てきませんでした。** **引き続き未確認**です
+**（1）Claude Cowork のリリースノート（11月分）** — **11月付のものは見つかりませんでした。** 一番新しいのは10月分です（未確認）:
 
-**出典のページ**（二次情報。未確認）: [Cowork tab missing after update（claudeissues.com）](https://claudeissues.com/issue/49748-bug-cowork-tab-missing-after-update-on-windows-11)、[Where did the Cowork and Code tabs go?（claudeissues.com）](https://claudeissues.com/issue/51517-docs-where-did-the-cowork-and-code-tabs-go)、[Cowork Tab Relocation lacks visual affordance（claudeissues.com）](https://claudeissues.com/issue/51795-bug-ux-issue-on-windows-11-client-interface-cowork-tab-relocation-in-windows-des)、[Anthropic $965 Billion Valuation（pulse2.com）](https://pulse2.com/anthropic-965-billion-valuation-following-65-billion-series-h-funding-and-claude-opus-4-8-launch/)
+- **「2026年10月6日以降、Pro と Max の新しい Cowork のタスクは、すべての画面でクラウドで動く。それより前に自分のパソコンで始めたタスクはローカルのまま」**
+- 2026年9月16日: Cowork がすべての会話に入った
+- 2026年8月25日: メモリがチャットと Cowork をまたいでクラウドで動くようになった
+- 2026年7月7日: Cowork がデスクトップに加えて web とモバイルに広がった
 
-過去数日から持ち越しの未確認分（**Claude Desktop の11月10日の変更の内容**（**昨日を過ぎました**）、**Claude Code の「What's New」が目次から外された理由**（今日の新規）、**週刊まとめが Week 37 で止まっている理由**（今日の新規）、**Security posture のリリースノートが11月5日の節に後から足された理由**（今日の新規）、Claude Cowork のクラウド実行への移行と「Only on your computer」設定の削除、Ultra プランがいつ始まったか・Max の $200 の段との関係（**17日目**）、Fable 5.2 が claude.ai とアプリで使えるのか、Dreams の現在のサポート対象モデル、透かしの対象モデルとプラットフォームの完全な一覧、Text Completions のページが削除されたのか索引から外れただけなのか、Claude Haiku 3.5 だけが価格表から外れた理由、Claude for Government、Claude Frontier Academy の1億ドル、Claude Dashboards と Claude Motion の beta、Docs / Slides / Design の beta 終了と全プラン提供、Claude for Google Workspace、Project Glasswing の 129,000件、利用規約の更新、量子回路の研究、NIST 暗号のシード値の件、中間選挙への対応、Genesis Mission の1億5,000万ドル、Anthropic Public Benefit Fund、サソリの神経毒の研究、Claude が Anthropic のモデル研究開発の26%を主導、ART 酵素の先行性をめぐる争い、Claude Code projects のベータ、Claude for Small Business、Claude for Financial Advisors、Claude Design の移行の詳細、user profiles の料金とベータヘッダの詳細、第3四半期の決算と IPO の時期、Claude Tag の6月の立ち上げの詳細、Morning Brief の提供範囲、広告を入れない方針、プラグインのデモ用マーケットプレイスの扱い）は、今日も一次ソースに現れていません。**引き続き未確認**です。
+**これは「Cowork のクラウド実行への移行」として持ち越していた項目に、部分的に答える内容です。** **ただし出どころは第三者の集約サイトなので、未確認です。** **検索結果自身が「公式のヘルプセンター（support.claude.com の記事 12138966）を確認するように」と述べています。** **その support.claude.com はこの環境からブロックされています。**
+
+**（2）Claude Desktop の11月10日の変更** — **②に全文を書きました。** 検索結果は「Anthropic の公式ドキュメント（`claude.com/docs/third-party/claude-desktop/configuration-changelog`）にそう書かれている」と述べていますが、**そのページはこの環境からブロックされていて開けません。未確認です。** **検索結果自身が「結果の日付情報が今日と食い違っている（11月10日の項目が『124日前』『119日前』と出る）」と但し書きを付けています。**
+
+**出典のページ**（二次情報。未確認）: [Configuration changelog（claude.com docs。**この環境からは開けません**）](https://claude.com/docs/third-party/claude-desktop/configuration-changelog)、[Unified Claude の解説（SmartScope）](https://smartscope.blog/en/blog/unified-claude-claude-desktop-changes-impact-cowork-disabled-2026/)、[Claude Desktop Cowork staat vanaf 10 november aan（nextenabler.com）](https://nextenabler.com/claude-desktop-cowork-10-november/)、[Anthropic merges chat and task work in Claude Desktop（superpowerdaily）](https://superpowerdaily.com/posts/anthropic-merges-chat-and-task-work-in-claude-desktop-s-third-party-deployments)、[Claude の変更履歴（gradually.ai）](https://www.gradually.ai/en/changelogs/claude/)
+
+持ち越しの未確認分（**Claude Desktop の11月10日の変更の一次情報での裏取り**、**`coworkTabEnabled` の廃止日程（11月17日・12月17日）の裏取り**、**Claude Code の「What's New」が構成から外された理由**、**週刊まとめが Week 37 で止まっている理由**、**Bedrock の `mantle` / `runtime` という呼び分けに変えた理由**、**モデル概要と価格表で Mythos のキャッシュ料金の書き方が食い違っている件**、**Per-message effort の中身**、Security posture のリリースノートが11月5日の節に後から足された理由、Ultra プランがいつ始まったか・Max の $200 の段との関係（**18日目**）、Fable 5.2 が claude.ai とアプリで使えるのか、Dreams の対応モデルの完全な一覧、透かしの対象モデルとプラットフォームの完全な一覧、Text Completions のページが削除されたのか索引から外れただけなのか、Claude Haiku 3.5 だけが価格表から外れた理由、Claude for Government、Claude Frontier Academy の1億ドル、Claude Dashboards と Claude Motion の beta、Docs / Slides / Design の beta 終了と全プラン提供、Claude for Google Workspace、Project Glasswing の 129,000件、利用規約の更新、量子回路の研究、NIST 暗号のシード値の件、中間選挙への対応、Genesis Mission の1億5,000万ドル、Anthropic Public Benefit Fund、サソリの神経毒の研究、Claude が Anthropic のモデル研究開発の26%を主導、ART 酵素の先行性をめぐる争い、Claude Code projects のベータ、Claude for Small Business、Claude for Financial Advisors、Claude Design の移行の詳細、user profiles の料金とベータヘッダの詳細、第3四半期の決算と IPO の時期、Claude Tag の6月の立ち上げの詳細、Morning Brief の提供範囲、広告を入れない方針、プラグインのデモ用マーケットプレイスの扱い）は、今日も一次ソースに現れていません。**引き続き未確認**です。
 
 ---
 
