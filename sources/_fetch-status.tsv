@@ -2,8 +2,8 @@ name	http_code	bytes	result
 claude-code-changelog.md	200	1363204	OK
 claude-code-docs-index.txt	200	49955	OK
 platform-release-notes.md	200	146400	OK
-platform-docs-index.txt	200	102975	OK
-models-overview.md	200	29196	OK
-model-deprecations.md	200	16666	OK
-pricing.md	200	55859	OK
+platform-docs-index.txt	200	104958	OK
+models-overview.md	200	19558	OK
+model-deprecations.md	200	14100	OK
+pricing.md	200	40637	OK
 npm-claude-code-latest.json	200	371	OK
